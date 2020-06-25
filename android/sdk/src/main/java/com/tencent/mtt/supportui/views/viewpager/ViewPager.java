@@ -1,13 +1,5 @@
 package com.tencent.mtt.supportui.views.viewpager;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
-import com.tencent.mtt.supportui.utils.ViewCompatTool;
-import com.tencent.mtt.supportui.views.ScrollChecker;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -35,6 +27,14 @@ import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
+
+import com.tencent.mtt.supportui.utils.ViewCompatTool;
+import com.tencent.mtt.supportui.views.ScrollChecker;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by leonardgong on 2018/4/19 0007.
@@ -220,6 +220,8 @@ public class ViewPager extends ViewGroup implements ScrollChecker.IScrollCheck
 	/* private */ int									mDrawingOrder;
 	/* private */ ArrayList<View>						mDrawingOrderedChildren;
 	/* private */static final ViewPositionComparator	sPositionComparator				= new ViewPositionComparator();
+
+	public float middleSidesPadding = -1.f;
 	/**
 	 * Indicates that the pager is in an idle, settled state. The current page
 	 * is fully in view and no animation is in progress.
@@ -803,6 +805,18 @@ public class ViewPager extends ViewGroup implements ScrollChecker.IScrollCheck
 		{
 			final int size = getClientSize();
 			dest = (int) (size * Math.max(mFirstOffset, Math.min(curInfo.offset, mLastOffset)));
+      // 非首尾页面，两侧padding逻辑：支持前端设置（middleSidesPadding），否则走默认逻辑，页面居中
+      if (curInfo.position >= 1 && curInfo.position < mAdapter.getCount() - 1) {
+        if(middleSidesPadding >= 0) {
+          dest -= middleSidesPadding;
+        } else {
+          dest -= mPageMargin + (int) ((size - (mAdapter.getPageSize(curInfo.position) * size + 2 * mPageMargin)) / 2);
+        }
+      }
+
+      if (curInfo.position >= mAdapter.getCount() - 1) {
+        dest += mPageMargin;
+      }
 		}
 		if (smoothScroll)
 		{
