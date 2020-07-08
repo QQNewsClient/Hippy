@@ -455,7 +455,8 @@ public class AsyncImageView extends ViewGroup implements Animator.AnimatorListen
 			{
 				updateContentDrawableProperty();
 			}
-			else if (sourceType == SOURCE_TYPE_DEFAULT_SRC && mDefaultSourceDrawable != null)
+			else if (sourceType == SOURCE_TYPE_DEFAULT_SRC && mDefaultSourceDrawable != null
+        && mSourceDrawable == null) // src未加载，才显示默认图；避免时序问题
 			{
 				if (mContentDrawable instanceof ContentDrawable && (mUrlFetchState != IMAGE_LOADED || mSourceDrawable == null))
 				{
