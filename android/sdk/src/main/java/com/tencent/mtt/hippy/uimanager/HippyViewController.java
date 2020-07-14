@@ -19,13 +19,15 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Looper;
 import android.os.MessageQueue;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+
 import com.tencent.mtt.hippy.HippyEngineContext;
+import com.tencent.mtt.hippy.HippyGlobalConfigs;
 import com.tencent.mtt.hippy.HippyInstanceContext;
 import com.tencent.mtt.hippy.HippyRootView;
+import com.tencent.mtt.hippy.adapter.dt.HippyDtAdapter;
 import com.tencent.mtt.hippy.annotation.HippyControllerProps;
 import com.tencent.mtt.hippy.common.HippyArray;
 import com.tencent.mtt.hippy.common.HippyMap;
@@ -599,6 +601,43 @@ public abstract class HippyViewController<T extends View & HippyViewBase> implem
 			view.removeOnAttachStateChangeListener(NativeGestureDispatcher.getOnDetachedFromWindowListener());
 		}
 	}
+
+  @HippyControllerProps(name = "dtPage", defaultType = HippyControllerProps.MAP)
+  public void setDtPage(T view, HippyMap params) {
+    HippyDtAdapter dtAdapter = getDtAdapter(view.getContext());
+    if (dtAdapter == null) {
+      return;
+    }
+    dtAdapter.setDtPage(view, params);
+  }
+
+  @HippyControllerProps(name = "dtElement", defaultType = HippyControllerProps.MAP)
+  public void setDtElement(T view, HippyMap params) {
+    HippyDtAdapter dtAdapter = getDtAdapter(view.getContext());
+    if (dtAdapter == null) {
+      return;
+    }
+    dtAdapter.setDtElement(view, params);
+  }
+
+  private HippyDtAdapter getDtAdapter(Context context) {
+    if (!(context instanceof HippyInstanceContext)) {
+      return null;
+    }
+
+    HippyInstanceContext instanceContext = (HippyInstanceContext) context;
+    HippyEngineContext engineContext = instanceContext.getEngineContext();
+    if (engineContext == null) {
+      return null;
+    }
+
+    HippyGlobalConfigs globalConfigs = engineContext.getGlobalConfigs();
+    if (globalConfigs == null) {
+      return null;
+    }
+
+    return globalConfigs.getDtAdapter();
+  }
 
 	@HippyControllerProps(name = NodeProps.CUSTOM_PROP)
 	public void setCustomProp(T view, String methodName, Object props)
