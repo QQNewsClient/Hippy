@@ -21,6 +21,7 @@ import com.tencent.mtt.hippy.adapter.DefaultLogAdapter;
 import com.tencent.mtt.hippy.adapter.HippyLogAdapter;
 import com.tencent.mtt.hippy.adapter.device.DefaultDeviceAdapter;
 import com.tencent.mtt.hippy.adapter.device.HippyDeviceAdapter;
+import com.tencent.mtt.hippy.adapter.dt.HippyDtAdapter;
 import com.tencent.mtt.hippy.adapter.exception.DefaultExceptionHandler;
 import com.tencent.mtt.hippy.adapter.exception.HippyExceptionHandlerAdapter;
 import com.tencent.mtt.hippy.adapter.executor.DefaultExecutorSupplierAdapter;
@@ -101,6 +102,7 @@ public class HippyGlobalConfigs
 
 
 	private HippyLogAdapter					mLogAdapter;
+	private HippyDtAdapter mDtAdapter;
 
 	public HippyGlobalConfigs(HippyEngine.EngineInitParams params)
 	{
@@ -116,6 +118,7 @@ public class HippyGlobalConfigs
 		this.mSoLoaderAdapter = params.soLoader;
 		this.mDeviceAdapter = params.deviceAdapter;
 		this.mLogAdapter = params.logAdapter;
+		this.mDtAdapter = params.dtAdapter;
 	}
 
 	private HippyGlobalConfigs(Context context,  HippySharedPreferencesAdapter sharedPreferencesAdapter,
@@ -166,6 +169,10 @@ public class HippyGlobalConfigs
 
 		}
 	}
+
+	public HippyDtAdapter getDtAdapter() {
+	  return mDtAdapter;
+  }
 
 	public HippyLogAdapter getLogAdapter()
 	{
@@ -242,6 +249,7 @@ public class HippyGlobalConfigs
 		params.soLoader = mSoLoaderAdapter;
 		params.deviceAdapter = mDeviceAdapter;
 		params.logAdapter = mLogAdapter;
+		params.dtAdapter = mDtAdapter;
 	}
 
 	public static class Builder
