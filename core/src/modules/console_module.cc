@@ -84,7 +84,7 @@ void ConsoleModule::Log(const hippy::napi::CallbackInfo& info) {
       HIPPY_LOG(hippy::Error, log_msg);
     else if (type.compare("fatal") == 0)
       HIPPY_LOG(hippy::Fatal, log_msg);
-    else
+    //else
       //HIPPY_LOG(hippy::Debug, log_msg);
   }
 
