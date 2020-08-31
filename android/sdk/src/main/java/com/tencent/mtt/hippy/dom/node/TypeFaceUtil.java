@@ -91,6 +91,11 @@ public class TypeFaceUtil
 		}
 		return true;
 	}
+
+  public static void addTypeface(String key, Typeface typeface) {
+    mFontCache.put(key, typeface);
+  }
+
 	public static Typeface addTypeface(String fontFamilyName, String fontPath, int style)
 	{
 		String cache = fontFamilyName + style;
