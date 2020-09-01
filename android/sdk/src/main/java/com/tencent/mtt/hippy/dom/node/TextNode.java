@@ -703,7 +703,10 @@ public class TextNode extends StyleNode
 		}
 		else
 		{
-			layout = new StaticLayout(text, textPaint, (int) width, mTextAlign, 1.f, 0.f, true);
+      // 修正某些机器上命中临界值的问题（增加四舍五入逻辑）
+      // 如带背景色的专题icon,左右padding为3时，会误算为两行，4则是一行；
+      // 原因是padding 3时，宽度是95.99，int取整直接变成了95,恰好在临界值上，导致计算错误
+      layout = new StaticLayout(text, textPaint, Math.round(width), mTextAlign, 1.f, 0.f, true);
 		}
 		if (mNumberOfLines != UNSET && mNumberOfLines > 0)
 		{
@@ -717,7 +720,7 @@ public class TextNode extends StyleNode
 				}
 			}
 		}
-		
+
 		layout.getPaint().setTextSize(mFontSize);
 		return layout;
 	}
