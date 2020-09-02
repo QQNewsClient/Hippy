@@ -58,7 +58,7 @@ public class RecyclerView extends RecyclerViewBase implements RecyclerViewBase.O
 	public RecyclerView(Context context)
 	{
 		super(context);
-		setOverScrollEnabled(true);
+		setOverScrollEnabled(false);
 		setVerticalScrollBarEnabled(true);
 		setHorizontalScrollBarEnabled(false);
 		setOnScrollListener(this);
