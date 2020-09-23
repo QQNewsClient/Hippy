@@ -39,6 +39,7 @@ import com.tencent.mtt.hippy.adapter.soloader.DefaultSoLoaderAdapter;
 import com.tencent.mtt.hippy.adapter.soloader.HippySoLoaderAdapter;
 import com.tencent.mtt.hippy.adapter.storage.DefaultStorageAdapter;
 import com.tencent.mtt.hippy.adapter.storage.HippyStorageAdapter;
+import com.tencent.mtt.hippy.views.wormhole.event.HippyEventObserverAdapter;
 
 /**
  * FileName: HippyGlobalConfigs
@@ -85,7 +86,6 @@ public class HippyGlobalConfigs
 	 */
 	private HippyEngineMonitorAdapter		mEngineMonitorAdapter;
 
-
 	/**
 	 * font scale adapter
 	 */
@@ -103,8 +103,9 @@ public class HippyGlobalConfigs
 
 	private HippyLogAdapter					mLogAdapter;
 	private HippyDtAdapter mDtAdapter;
+  private HippyEventObserverAdapter		mEventObserverAdapter;
 
-	public HippyGlobalConfigs(HippyEngine.EngineInitParams params)
+  public HippyGlobalConfigs(HippyEngine.EngineInitParams params)
 	{
 		this.mContext = params.context;
 		this.mSharedPreferencesAdapter = params.sharedPreferencesAdapter;
@@ -119,13 +120,14 @@ public class HippyGlobalConfigs
 		this.mDeviceAdapter = params.deviceAdapter;
 		this.mLogAdapter = params.logAdapter;
 		this.mDtAdapter = params.dtAdapter;
+		this.mEventObserverAdapter = params.eventObserverAdapter;
 	}
 
 	private HippyGlobalConfigs(Context context,  HippySharedPreferencesAdapter sharedPreferencesAdapter,
 			HippyExceptionHandlerAdapter exceptionHandler, HippyHttpAdapter httpAdapter, HippyImageLoader imageLoaderAdapter,
 			HippyExecutorSupplierAdapter executorSupplierAdapter, HippyStorageAdapter storageAdapter, HippyEngineMonitorAdapter engineMonitorAdapter,
 			HippyFontScaleAdapter hippyFontScaleAdapter, HippySoLoaderAdapter hippySoLoaderAdapter, HippyDeviceAdapter hippyDeviceAdapter,
-			HippyLogAdapter hippyLogAdapter)
+			HippyLogAdapter hippyLogAdapter, HippyEventObserverAdapter hippyEventObserverAdapter)
 	{
 		this.mContext = context;
 		this.mSharedPreferencesAdapter = sharedPreferencesAdapter;
@@ -139,6 +141,7 @@ public class HippyGlobalConfigs
 		this.mSoLoaderAdapter = hippySoLoaderAdapter;
 		this.mDeviceAdapter = hippyDeviceAdapter;
 		this.mLogAdapter = hippyLogAdapter;
+		this.mEventObserverAdapter = hippyEventObserverAdapter;
 	}
 
 	public void destroyIfNeed()
@@ -234,6 +237,11 @@ public class HippyGlobalConfigs
 		return mEngineMonitorAdapter;
 	}
 
+  public HippyEventObserverAdapter getEventObserverAdapter()
+  {
+    return mEventObserverAdapter;
+  }
+
 	@Deprecated
 	public void to(HippyEngine.EngineInitParams params)
 	{
@@ -278,6 +286,8 @@ public class HippyGlobalConfigs
 		private HippyDeviceAdapter				mDeviceAdapter;
 
 		private HippyLogAdapter					mLogAdapter;
+
+		private HippyEventObserverAdapter mEventObserverAdapter;
 
 
 		public HippyLogAdapter getLogAdapter()
@@ -359,6 +369,12 @@ public class HippyGlobalConfigs
 			return this;
 		}
 
+    public Builder setEventObserverAdapter(HippyEventObserverAdapter eventObserverAdapter)
+    {
+      this.mEventObserverAdapter = eventObserverAdapter;
+      return this;
+    }
+
 		@Deprecated
 		public HippyGlobalConfigs build()
 		{
@@ -414,7 +430,7 @@ public class HippyGlobalConfigs
 
 			HippyGlobalConfigs configs = new HippyGlobalConfigs(mContext,  mSharedPreferencesAdapter, mExceptionHandler,
 					mHttpAdapter, mImageLoaderAdapter, mExecutorSupplierAdapter, mStorageAdapter, mEngineMonitorAdapter, mFontScaleAdapter,
-					mSoLoaderAdapter, mDeviceAdapter, mLogAdapter);
+					mSoLoaderAdapter, mDeviceAdapter, mLogAdapter, mEventObserverAdapter);
 			return configs;
 		}
 	}
