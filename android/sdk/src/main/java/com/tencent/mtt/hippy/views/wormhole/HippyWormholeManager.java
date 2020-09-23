@@ -36,6 +36,12 @@ public class HippyWormholeManager implements HippyWormholeProxy {
   private static final AtomicInteger mWormholeIdCounter = new AtomicInteger(1000);
   private static volatile HippyWormholeManager INSTANCE;
   private HippyEngine mWormholeEngine;
+  /**
+   * 是否跟native列表混合使用
+   * true - 是
+   * false - 跟hippy列表混用
+   */
+  private boolean mHybridNative = false;
   private ConcurrentHashMap<String, ViewGroup> mTkdWormholeMap = new ConcurrentHashMap<String, ViewGroup>();
   //存储业务方引擎
   private ArrayList<HippyEngine> mClientEngineList = new ArrayList<>();
@@ -56,7 +62,12 @@ public class HippyWormholeManager implements HippyWormholeProxy {
   }
 
   public void setServerEngine(HippyEngine engine) {
+    setServerEngine(engine, false);
+  }
+
+  public void setServerEngine(HippyEngine engine, boolean hybridNative) {
     mWormholeEngine = engine;
+    mHybridNative = hybridNative;
   }
 
   private RenderNode getWormholeNode(HippyWormholeView wormhole) {
@@ -85,11 +96,17 @@ public class HippyWormholeManager implements HippyWormholeProxy {
   }
 
   private void sendBatchCompleteMessageToClient(float width, float height, View view) {
-    HippyMap layoutMeasurement = new HippyMap();
-    layoutMeasurement.pushDouble("width", PixelUtil.px2dp(width));
-    layoutMeasurement.pushDouble("height", PixelUtil.px2dp(height));
-    HippyViewEvent event = new HippyViewEvent(WORMHOLE_SERVER_BATCH_COMPLETE);
-    event.send(view, layoutMeasurement);
+    if(mHybridNative) {
+      // todo aprilgong
+      view.getLayoutParams().width = (int) width;
+      view.getLayoutParams().height = (int) height;
+    } else {
+      HippyMap layoutMeasurement = new HippyMap();
+      layoutMeasurement.pushDouble("width", PixelUtil.px2dp(width));
+      layoutMeasurement.pushDouble("height", PixelUtil.px2dp(height));
+      HippyViewEvent event = new HippyViewEvent(WORMHOLE_SERVER_BATCH_COMPLETE);
+      event.send(view, layoutMeasurement);
+    }
   }
 
   public void onServerBatchComplete(HippyWormholeView wormholeView) {

@@ -94,4 +94,5 @@ dependencies {
     if (PRODUCT_FLAVORS == 'QB') {
         implementation 'com.tencent.mtt:support-ui:99.1.0'
     }
+    implementation 'com.android.support:recyclerview-v7:26.1.0'
 }

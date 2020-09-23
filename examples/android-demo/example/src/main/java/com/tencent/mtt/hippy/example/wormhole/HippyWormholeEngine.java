@@ -1,9 +1,11 @@
-package com.tencent.mtt.hippy.example;
+package com.tencent.mtt.hippy.example.wormhole;
+
+import static com.tencent.mtt.hippy.views.wormhole.HippyWormholeManager.WORMHOLE_TAG;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Window;
 
 import com.tencent.mtt.hippy.HippyEngine;
@@ -12,72 +14,47 @@ import com.tencent.mtt.hippy.HippyRootView;
 import com.tencent.mtt.hippy.adapter.exception.HippyExceptionHandlerAdapter;
 import com.tencent.mtt.hippy.common.HippyJsException;
 import com.tencent.mtt.hippy.common.HippyMap;
+import com.tencent.mtt.hippy.example.MyAPIProvider;
 import com.tencent.mtt.hippy.example.adapter.MyImageLoader;
-import com.tencent.mtt.hippy.example.wormhole.HippyWormholeEngine;
-import com.tencent.mtt.hippy.example.wormhole.MyAdapter;
 import com.tencent.mtt.hippy.utils.LogUtils;
+
+import com.tencent.mtt.hippy.views.wormhole.HippyWormholeManager;
+import com.tencent.mtt.hippy.views.wormhole.event.HippyEventObserverAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Copyright (C) 2005-2020 TENCENT Inc.All Rights Reserved.
- * FileName: MyActivity demo，只展示了常用能力的代码
- * 加载出Hippy的View分为三步：
- * 1. 用EngineInitParams参数create出HippyEngine；
- * 2. HippyEngine.initEngine异步初始化；
- * 3. 用ModuleLoadParams参数loadModule加载出hippy的jsbundle，得到Hippy的View。
- * Description：
- */
-public class MyActivity extends Activity
+public class HippyWormholeEngine
 {
 	private HippyEngine mHippyEngine;
-	private HippyRootView mHippyView;
-  private HippyWormholeEngine mHippyWormholeEngine;
+	private HippyRootView mHippyRootView;
 
+	public HippyWormholeEngine() {}
 
-  @Override
-	public void onCreate(Bundle savedInstanceState)
-	{
-		super.onCreate(savedInstanceState);
-		getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-
-    mHippyWormholeEngine = new HippyWormholeEngine();
-    mHippyWormholeEngine.init(this, new Runnable() {
-      @Override
-      public void run() {
-        RecyclerView recyclerView = findViewById(R.id.recyclerview);
-        List<String> list = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
-          list.add(i + 1 + "");
-        }
-        MyAdapter adapter = new MyAdapter(list, mHippyWormholeEngine);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(MyActivity.this);
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
-      }
-    });
-
-    if(true) {
-      setContentView(R.layout.list);
-    } else
-    // 1/3. 初始化hippy引擎
+	public void init(final Context context, final Runnable runnable) {
+		// 1/3. 初始化hippy引擎
 		{
 			HippyEngine.EngineInitParams initParams = new HippyEngine.EngineInitParams();
 			// 必须：宿主（Hippy的使用者）的Context
 			// 若存在多个Activity加载多个业务jsbundle的情况，则这里初始化引擎时建议使用Application的Context
-			initParams.context = this;
+			initParams.context = context;
 			// 必须：图片加载器
-			initParams.imageLoader = new MyImageLoader(this.getApplicationContext());
-			initParams.debugServerHost = "localhost:38989";
+			initParams.imageLoader = new MyImageLoader();
+
 			// 可选：是否设置为debug模式，默认为false。调试模式下，所有jsbundle都是从debug server上下载
-			initParams.debugMode = false;
+			initParams.debugMode = true;
 			// 可选：是否打印引擎的完整的log。默认为false
 			initParams.enableLog = true;
 			// 可选：debugMode = false 时必须设置coreJSAssetsPath或coreJSFilePath（debugMode = true时，所有jsbundle都是从debug server上下载）
 			initParams.coreJSAssetsPath = "vendor.android.js";
-
+			//虫洞引擎注册消息分发器
+			initParams.eventObserverAdapter = new HippyEventObserverAdapter() {
+				@Override
+				public void onClientMessageReceived(HippyMap data) {
+					//虫洞自己收到了这个数据之后需要广播给业务方
+					HippyWormholeManager.getInstance().sendMessageToAllClient(data);
+				}
+			};
 			// 可选：异常处理器
 			initParams.exceptionHandler = new HippyExceptionHandlerAdapter() {
 				// JavaScript执行异常
@@ -124,7 +101,7 @@ public class MyActivity extends Activity
 
 						HippyEngine.ModuleLoadParams loadParams = new HippyEngine.ModuleLoadParams();
 						// 必须：该Hippy模块将要挂在的Activity or Dialog的context
-						loadParams.context = MyActivity.this;
+						loadParams.context = context;
 						/*
 						  必须：指定要加载的Hippy模块里的组件（component）。componentName对应的是js文件中的"appName"，比如：
 						  var hippy = new Hippy({
@@ -132,7 +109,7 @@ public class MyActivity extends Activity
 						      entryPage: App
 						  });
 						  */
-						loadParams.componentName = "Demo";
+						loadParams.componentName = "AdsTemplates";
 						/*
 						  可选：二选一设置。自己开发的业务模块的jsbundle的assets路径（assets路径和文件路径二选一，优先使用assets路径）
 						  debugMode = false 时必须设置jsAssetsPath或jsFilePath（debugMode = true时，所有jsbundle都是从debug server上下载）
@@ -147,48 +124,25 @@ public class MyActivity extends Activity
 						loadParams.jsParams = new HippyMap();
 						loadParams.jsParams.pushString("msgFromNative", "Hi js developer, I come from native code!");
 						// 加载Hippy前端模块
-						mHippyView = mHippyEngine.loadModule(loadParams);
+						mHippyRootView = mHippyEngine.loadModule(loadParams, new HippyEngine.ModuleListener() {
+							public void onInitialized(int statusCode, String msg, HippyRootView hippyRootView) {
+								if (statusCode == HippyEngine.STATUS_OK) {
+									HippyWormholeManager.getInstance().setServerEngine(mHippyEngine, true);
+									runnable.run();
+									Log.d("april", "wormhole engine success");
+								} else {
+									LogUtils.e(WORMHOLE_TAG, "Hippy: init worm engine failed statusCode:" + statusCode + ",msg:" + msg);
+								}
+							}
 
-						setContentView(mHippyView);
+							public boolean onJsException(HippyJsException exception) {
+								LogUtils.e(WORMHOLE_TAG, "Hippy: loadModule onJsException:" + exception);
+								return true;
+							}
+						});
 					}
 				}
 			});
 		}
-	}
-
-	@Override
-	protected void onDestroy()
-	{
-    if (mHippyEngine == null) {
-      super.onDestroy();
-      return;
-    }
-		// 3/3. 摧毁hippy前端模块，摧毁hippy引擎
-		mHippyEngine.destroyModule(mHippyView);
-		mHippyEngine.destroyEngine();
-		super.onDestroy();
-	}
-
-	@Override
-	public void onBackPressed() {
-    if (mHippyEngine == null) {
-      super.onBackPressed();
-      return;
-    }
-
-		// 可选：让hippy前端能够监听并拦截back事件
-		boolean handled = mHippyEngine.onBackPressed(new HippyEngine.BackPressHandler() {
-			@Override
-			public void handleBackPress() {
-				MyActivity.this.doActivityBack();
-			}
-		});
-		if (!handled)
-			super.onBackPressed();
-	}
-
-	// 可选：让hippy前端能够监听并拦截back事件
-	public void doActivityBack() {
-		super.onBackPressed();
 	}
 }
