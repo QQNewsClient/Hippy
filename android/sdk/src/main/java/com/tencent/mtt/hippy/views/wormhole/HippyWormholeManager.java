@@ -1,28 +1,26 @@
 package com.tencent.mtt.hippy.views.wormhole;
 
-
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.tencent.mtt.hippy.HippyEngine;
 import com.tencent.mtt.hippy.HippyEngineContext;
-import com.tencent.mtt.hippy.HippyInstanceContext;
+import com.tencent.mtt.hippy.HippyRootView;
 import com.tencent.mtt.hippy.common.HippyMap;
 import com.tencent.mtt.hippy.uimanager.HippyViewEvent;
-import com.tencent.mtt.hippy.uimanager.RenderManager;
 import com.tencent.mtt.hippy.uimanager.RenderNode;
 import com.tencent.mtt.hippy.utils.PixelUtil;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class HippyWormholeManager implements HippyWormholeProxy {
+public class HippyWormholeManager {
   public static final String WORMHOLE_TAG                       = "hippy_wormhole";
 
   public static final String WORMHOLE_PARAMS                    = "params";
@@ -36,13 +34,16 @@ public class HippyWormholeManager implements HippyWormholeProxy {
   private static final AtomicInteger mWormholeIdCounter = new AtomicInteger(1000);
   private static volatile HippyWormholeManager INSTANCE;
   private HippyEngine mWormholeEngine;
-  /**
-   * 是否跟native列表混合使用
-   * true - 是
-   * false - 跟hippy列表混用
-   */
-  private boolean mHybridNative = false;
-  private ConcurrentHashMap<String, ViewGroup> mTkdWormholeMap = new ConcurrentHashMap<String, ViewGroup>();
+  private HippyRootView mHippyRootView;
+  private HippyWormholeContainer mWormholeContainer;
+
+  private ConcurrentHashMap<String, Integer> mWormholeNodeMap = new ConcurrentHashMap<String, Integer>();
+
+  //for native场景
+  private ConcurrentHashMap<String, View> mNativeWormholeParentViewMap = new ConcurrentHashMap<String, View>();
+  public ConcurrentHashMap<String, View> mNativeWormholeChildViewMap = new ConcurrentHashMap<String, View>();
+
+
   //存储业务方引擎
   private ArrayList<HippyEngine> mClientEngineList = new ArrayList<>();
 
@@ -61,46 +62,41 @@ public class HippyWormholeManager implements HippyWormholeProxy {
     return INSTANCE;
   }
 
-  public void setServerEngine(HippyEngine engine) {
-    setServerEngine(engine, false);
-  }
-
-  public void setServerEngine(HippyEngine engine, boolean hybridNative) {
+  public void setServerEngine(HippyEngine engine,HippyRootView hippyRootView) {
     mWormholeEngine = engine;
-    mHybridNative = hybridNative;
+    mHippyRootView = hippyRootView;
   }
 
-  private RenderNode getWormholeNode(HippyWormholeView wormhole) {
-    Context context = wormhole.getContext();
-    if (context instanceof HippyInstanceContext) {
-      HippyEngineContext engineContext = ((HippyInstanceContext) context).getEngineContext();
-      if (engineContext != null) {
-        RenderManager rm = engineContext.getRenderManager();
-        RenderNode node = rm.getRenderNode(wormhole.getId());
-        return node;
-      }
+  public HippyEngineContext getEngineContext() {
+    return mWormholeEngine != null ? mWormholeEngine.getEngineContext() : null;
+  }
+
+  public HippyRootView getHippyRootView() {
+    return mHippyRootView;
+  }
+
+  public void setWormholeContainer(HippyWormholeContainer container) {
+    mWormholeContainer = container;
+  }
+
+  private void sendDataReceivedMessageToServer(HippyMap bundle) {
+    JSONArray jsonArray = new JSONArray();
+    jsonArray.put(bundle);
+    mWormholeEngine.sendEvent(WORMHOLE_CLIENT_DATA_RECEIVED, jsonArray);
+  }
+
+  private void sendBatchCompleteMessageToClient(String wormholeId, View view) {
+    int id = mWormholeNodeMap.get(wormholeId);
+    HippyEngineContext engineContext = mWormholeEngine.getEngineContext();
+    if (engineContext == null) {
+      return;
     }
 
-    return null;
-  }
+    RenderNode node = engineContext.getRenderManager().getRenderNode(id);
+    if (node != null) {
+      float width = node.getWidth();
+      float height = node.getHeight();
 
-  private void sendDataReceivedMessageToServer(String wormholeId, HippyMap initProps) {
-    HippyMap paramsMap = initProps.getMap(WORMHOLE_PARAMS);
-    if (paramsMap != null) {
-      HippyMap bundle = paramsMap.copy();
-      bundle.pushString(WORMHOLE_WORMHOLE_ID, wormholeId);
-      JSONArray jsonArray = new JSONArray();
-      jsonArray.put(bundle);
-      mWormholeEngine.sendEvent(WORMHOLE_CLIENT_DATA_RECEIVED, jsonArray);
-    }
-  }
-
-  private void sendBatchCompleteMessageToClient(float width, float height, View view) {
-    if(mHybridNative) {
-      // todo aprilgong
-      view.getLayoutParams().width = (int) width;
-      view.getLayoutParams().height = (int) height;
-    } else {
       HippyMap layoutMeasurement = new HippyMap();
       layoutMeasurement.pushDouble("width", PixelUtil.px2dp(width));
       layoutMeasurement.pushDouble("height", PixelUtil.px2dp(height));
@@ -109,32 +105,63 @@ public class HippyWormholeManager implements HippyWormholeProxy {
     }
   }
 
-  public void onServerBatchComplete(HippyWormholeView wormholeView) {
-    if (wormholeView == null) {
+  private View findWormholeView(String wormholeId) {
+    if (mWormholeEngine == null || !mWormholeNodeMap.containsKey(wormholeId)) {
+      return null;
+    }
+
+    HippyEngineContext engineContext = mWormholeEngine.getEngineContext();
+    if (engineContext == null) {
+      return null;
+    }
+
+    int id = mWormholeNodeMap.get(wormholeId);
+    View view = engineContext.getRenderManager().getControllerManager().findView(id);
+    if (view == null) {
+      RenderNode node = engineContext.getRenderManager().getRenderNode(id);
+      if (node != null) {
+        view = node.createViewRecursive();
+        node.updateViewRecursive();
+      }
+    }
+    return view;
+  }
+
+  private void addWormholeToParent(View wormholeView, View newParent) {
+    if (newParent == null || !(newParent instanceof ViewGroup)) {
       return;
     }
 
-    RenderNode node = getWormholeNode(wormholeView);
-    if (node != null) {
-      String businessId = wormholeView.getBusinessId();
-      ViewGroup newParent = mTkdWormholeMap.get(businessId);
-      if (newParent == null) {
-        return;
-      }
-
-      ViewGroup oldParent = (ViewGroup)(wormholeView.getParent());
-      if (oldParent != newParent) {
+    ViewGroup oldParent = (ViewGroup)(wormholeView.getParent());
+    if (oldParent != newParent) {
+      if (oldParent != null) {
         oldParent.removeView(wormholeView);
-        newParent.addView(wormholeView);
       }
-
-      float width = node.getWidth();
-      float height = node.getHeight();
-      sendBatchCompleteMessageToClient(width, height, newParent);
+      //todo 如果wormhole不是作为parent的唯一子节点的话，这里可能会有隐患
+      ((ViewGroup)newParent).removeAllViews();
+      ((ViewGroup)newParent).addView(wormholeView);
+    }
+    //将虫洞的宽高同步给oarent
+    ViewGroup.LayoutParams layoutParams = newParent.getLayoutParams();
+    if (layoutParams!=null && layoutParams.height != wormholeView.getHeight()) {
+      layoutParams.height = wormholeView.getHeight();
+      newParent.setLayoutParams(layoutParams);
     }
   }
 
-  public String getWormholeId() {
+  public void onServerBatchComplete(HippyWormholeView wormholeView) {
+    String wormholeId = wormholeView.getWormholeId();
+      if (mNativeWormholeParentViewMap.containsKey(wormholeId)) {
+      //从native场景里找
+      View parent = mNativeWormholeParentViewMap.get(wormholeId);
+      if (parent != null) {
+        addWormholeToParent(wormholeView, parent);
+        sendBatchCompleteMessageToClient(wormholeId, parent);
+      }
+    }
+  }
+
+  public String generateWormholeId() {
     int id = mWormholeIdCounter.getAndIncrement();
     return "" + id;
   }
@@ -145,39 +172,16 @@ public class HippyWormholeManager implements HippyWormholeProxy {
       return null;
     }
 
-    String businessId = paramsMap.getString(WORMHOLE_WORMHOLE_ID);
-    return businessId;
+    String wormholeId = paramsMap.getString(WORMHOLE_WORMHOLE_ID);
+    return wormholeId;
   }
 
-  @Override
-  public void createWormhole(HippyMap initProps, ViewGroup parent) {
-    if (mWormholeEngine == null) {
-      return;
-    }
-
-    if (initProps == null || parent == null) {
-      return;
-    }
-
-    String wormholeId = getWormholeId();
+  public String onWormholeNodeSetProps(HippyMap initProps, Integer id) {
+    String wormholeId = getWormholeIdFromProps(initProps);
     if (!TextUtils.isEmpty(wormholeId)) {
-      if (!mTkdWormholeMap.containsValue(parent)) {
-        mTkdWormholeMap.put(wormholeId, parent);
-      }
-      sendDataReceivedMessageToServer(wormholeId,initProps);
+      mWormholeNodeMap.put(wormholeId, id);
     }
-  }
-
-  public void registerClientEngine(HippyEngine hippyEngine) {
-    if (!mClientEngineList.contains(hippyEngine)) {
-      mClientEngineList.add(hippyEngine);
-    }
-  }
-
-  public void unRegisterClientEngine(HippyEngine hippyEngine) {
-    if (!mClientEngineList.contains(hippyEngine)) {
-      mClientEngineList.remove(hippyEngine);
-    }
+    return wormholeId;
   }
 
   //如果是业务方收到了通知之后，应该要告知虫洞
@@ -196,9 +200,57 @@ public class HippyWormholeManager implements HippyWormholeProxy {
     }
   }
 
-  public void onWormholeDestroy(String id) {
-    if (!TextUtils.isEmpty(id)) {
-      mTkdWormholeMap.remove(id);
+  public void addNativeWormholeParent(String wormholeId, View parent) {
+    mNativeWormholeParentViewMap.put(wormholeId, parent);
+  }
+
+  public void addNativeWormholeChild(String wormholeId, View child) {
+    if (!TextUtils.isEmpty(wormholeId) && !mNativeWormholeChildViewMap.containsKey(wormholeId)) {
+      mNativeWormholeChildViewMap.put(wormholeId, child);
     }
   }
+
+  public View getNativeWormholeChild(String wormholeId) {
+    if (!TextUtils.isEmpty(wormholeId) && mNativeWormholeChildViewMap.containsKey(wormholeId)) {
+      return mNativeWormholeChildViewMap.get(wormholeId);
+    }
+    return null;
+  }
+
+  public View onNativeCreateWormholeParent(Context context) {
+    FrameLayout frameLayout = new FrameLayout(context);
+    frameLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT));
+    return frameLayout;
+  }
+
+  public void onNativeBindItemView(String wormholeId, View itemView, HippyMap hippyMap){
+    addNativeWormholeParent(wormholeId, itemView);
+    View childView = getNativeWormholeChild(wormholeId);
+    if(childView!=null){
+      addWormholeToParent(childView,itemView);
+    } else {
+      HippyWormholeManager.getInstance().sendDataReceivedMessageToServer(hippyMap);
+    }
+  }
+
+  public void onNativeWormholeDestroy(String wormholeId) {
+    if (!TextUtils.isEmpty(wormholeId) && mNativeWormholeParentViewMap.get(wormholeId) instanceof ViewGroup) {
+      ViewGroup targetView = (ViewGroup) mNativeWormholeParentViewMap.get(wormholeId);
+      if (targetView.getChildCount() > 0) {
+        View child = targetView.getChildAt(0);
+        if (child instanceof HippyWormholeView) {
+          targetView.removeView(child);
+          mWormholeContainer.addView(child);
+          HippyEngineContext engineContext = mWormholeEngine.getEngineContext();
+          if (engineContext != null) {
+            engineContext.getRenderManager().getControllerManager().deleteChild(mWormholeContainer.getId(), child.getId());
+          }
+        }
+      }
+      if (!TextUtils.isEmpty(wormholeId)) {
+        mNativeWormholeParentViewMap.remove(wormholeId);
+      }
+    }
+  }
+
 }

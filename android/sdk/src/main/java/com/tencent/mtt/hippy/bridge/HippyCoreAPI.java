@@ -58,7 +58,6 @@ import com.tencent.mtt.hippy.views.viewpager.HippyViewPagerItemController;
 import com.tencent.mtt.hippy.views.webview.HippyWebViewController;
 import com.tencent.mtt.hippy.views.wormhole.HippyWormholeContainerController;
 import com.tencent.mtt.hippy.views.wormhole.HippyWormholeController;
-import com.tencent.mtt.hippy.views.wormhole.TKDWormholeController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -228,8 +227,8 @@ public class HippyCoreAPI implements HippyAPIProvider
 		components.add(AudioViewController.class);
 		components.add(HippyCustomPropsController.class);
     components.add(HippyWormholeContainerController.class);
+		components.add(HippyWormholeController.class);
     components.add(HippyWormholeController.class);
-    components.add(TKDWormholeController.class);
 
 		addControllerWithClassName(VIDEO_CONTROLLER_CLASS_NAME, components);
 		return components;
