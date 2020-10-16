@@ -17,7 +17,9 @@ public class HippyWormholeContainerController extends HippyViewController<HippyW
 
   @Override
   protected View createViewImpl(final Context context, HippyMap iniProps) {
-    return new HippyWormholeContainer(context);
+    HippyWormholeContainer wormholeContainer = new HippyWormholeContainer(context);
+    HippyWormholeManager.getInstance().setWormholeContainer(wormholeContainer);
+    return wormholeContainer;
   }
 
 }
