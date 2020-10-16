@@ -40,11 +40,7 @@ public class MyActivity extends Activity
       @Override
       public void run() {
         RecyclerView recyclerView = findViewById(R.id.recyclerview);
-        List<String> list = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
-          list.add(i + 1 + "");
-        }
-        MyAdapter adapter = new MyAdapter(list, mHippyWormholeEngine);
+        MyAdapter adapter = new MyAdapter(mHippyWormholeEngine);
         LinearLayoutManager layoutManager = new LinearLayoutManager(MyActivity.this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
