@@ -88,7 +88,6 @@
     UITextView *_placeholderView;
     HippyText *_richTextView;
     NSAttributedString *_pendingAttributedText;
-    UIScrollView *_scrollView;
 
     UITextRange *_previousSelectionRange;
     NSUInteger _previousTextLength;
@@ -128,17 +127,12 @@
         _textView.backgroundColor = [UIColor clearColor];
         _textView.textColor = [UIColor blackColor];
         _textView.scrollsToTop = NO;
-        _textView.scrollEnabled = NO;
         _textView.delegate = self;
-
-        _scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
-        _scrollView.scrollsToTop = NO;
-        [_scrollView addSubview:_textView];
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldEditChanged:) name:UITextViewTextDidChangeNotification
                                                    object:_textView];
 
-        [self addSubview:_scrollView];
+        [self addSubview:_textView];
     }
     return self;
 }
@@ -270,7 +264,6 @@ static NSAttributedString *removeHippyTagFromString(NSAttributedString *string) 
     CGRect frame = UIEdgeInsetsInsetRect(self.bounds, adjustedFrameInset);
     _textView.frame = frame;
     _placeholderView.frame = frame;
-    _scrollView.frame = frame;
     [self updateContentSize];
 
     _textView.textContainerInset = adjustedTextContainerInset;
@@ -278,21 +271,6 @@ static NSAttributedString *removeHippyTagFromString(NSAttributedString *string) 
 }
 
 - (void)updateContentSize {
-    CGSize size = (CGSize) { _scrollView.frame.size.width, INFINITY };
-    size.height = [_textView sizeThatFits:size].height;
-    _scrollView.contentSize = size;
-    _textView.frame = (CGRect) { CGPointZero, size };
-
-    if (_viewDidCompleteInitialLayout && _onContentSizeChange && !CGSizeEqualToSize(_previousContentSize, size)) {
-        _previousContentSize = size;
-        _onContentSizeChange(@{
-            @"contentSize": @ {
-                @"height": @(size.height),
-                @"width": @(size.width),
-            },
-            @"target": self.hippyTag,
-        });
-    }
 }
 
 - (void)updatePlaceholder {
