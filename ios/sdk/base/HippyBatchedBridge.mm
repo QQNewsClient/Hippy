@@ -614,6 +614,26 @@ HIPPY_NOT_IMPLEMENTED(- (instancetype)initWithDelegate:(id<HippyBridgeDelegate>)
     return [NSDictionary dictionaryWithDictionary:deviceInfo];
 }
 
+- (NSDictionary *)deviceInfoDic {
+    //该方法可能从非UI线程调用
+    NSString *iosVersion = [[UIDevice currentDevice] systemVersion];
+    CGFloat rotateBounds = _screenSize.size.height < _screenSize.size.width;
+    
+    struct utsname systemInfo;
+    uname(&systemInfo);
+    NSString *deviceModel = [NSString stringWithCString:systemInfo.machine
+                                               encoding:NSUTF8StringEncoding];
+    
+    NSMutableDictionary *deviceInfo = [NSMutableDictionary dictionary];
+    [deviceInfo setValue:@"ios" forKey:@"OS"];
+    [deviceInfo setValue:iosVersion forKey:@"OSVersion"];
+    [deviceInfo setValue:deviceModel forKey:@"Device"];
+    [deviceInfo setValue:_HippySDKVersion forKey:@"SDKVersion"];
+    [deviceInfo setValue: _parentBridge.appVerson forKey:@"AppVersion"];
+    [deviceInfo setValue:[self HippyExportedDimensions:rotateBounds] forKey:@"Dimensions"];
+    return deviceInfo;
+}
+
 - (void)_flushPendingCalls
 {
     HippyAssertJSThread();

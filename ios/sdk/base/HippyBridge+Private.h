@@ -121,6 +121,8 @@ HIPPY_EXTERN void HippyVerifyAllModulesExported(NSArray *extraModules);
 - (void)processResponse:(id)json error:(NSError *)error;
 - (NSDictionary *)deviceInfo;
 - (NSString *)moduleConfig;
+- (NSDictionary *)deviceInfoDic;
+
 /**
  * Synchronously call a specific native module's method and return the result
  */

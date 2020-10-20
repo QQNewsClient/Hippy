@@ -31,6 +31,11 @@
 - (void)virtualListDidUpdated;
 @end
 
+typedef NS_ENUM(NSUInteger, HippyBaseListViewItemDataType) {
+    HippyBaseListViewItemDataTypeDefault, //默认值，数据来源同JS Bundle
+    HippyBaseListViewItemDataTypeWormhole,    //数据来源于虫洞JS
+    HippyBaseListViewItemDataTypeNative,  //数据来源于native绘制
+};
 
 @interface HippyVirtualNode : NSObject <HippyComponent>
 
@@ -44,8 +49,20 @@
 @property (nonatomic, weak) HippyVirtualCell *cellNode;
 @property (nonatomic, copy) NSNumber *rootTag;
 
+@property (nonatomic, assign) HippyBaseListViewItemDataType dataType;
+
+@property (nonatomic, weak) id owner;
+
 - (BOOL)isListSubNode;
 
+//判断当前node是否使用懒加载，和下面方法在于，这个方法仅通过self class判断是否是懒加载类型，默认NO
+- (BOOL)isLazilyLoadType;
+
+//判断当前node是否使用懒加载，和上面方法不同在于，如果parent node需要懒加载，当前node同样也懒加载。
+- (BOOL)createViewLazily;
+
+//通过isLazilyLoadType查找第一个懒加载的parent node
+- (HippyVirtualNode *)firstLazilyLoadTypeParentNode;
 
 typedef UIView * (^HippyCreateViewForShadow)(HippyVirtualNode *node);
 typedef UIView * (^HippyUpdateViewForShadow)(HippyVirtualNode *newNode, HippyVirtualNode *oldNode);
@@ -68,7 +85,7 @@ typedef void (^HippyVirtualNodeManagerUIBlock)(HippyUIManager *uiManager, NSDict
 
 
 @interface HippyVirtualList: HippyVirtualNode
-@property (nonatomic, assign) BOOL needFlush;
+@property (nonatomic, assign) BOOL isDirty;
 @end
 
 @interface UIView (HippyRemoveNode)

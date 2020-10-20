@@ -114,6 +114,35 @@
 	return [NSString stringWithFormat: @"hippyTag: %@, viewName: %@, props:%@, frame:%@", self.hippyTag, self.viewName, self.props, NSStringFromCGRect(self.frame)];
 }
 
+- (BOOL)isLazilyLoadType {
+    return NO;
+}
+
+- (BOOL)createViewLazily {
+    BOOL createViewLazily = NO;
+    HippyVirtualNode *pNode = [self parent];
+    while (pNode) {
+        if ([pNode createViewLazily]) {
+            createViewLazily = YES;
+            break;
+        }
+        else {
+            pNode = [pNode parent];
+        }
+    }
+    return createViewLazily;
+}
+
+- (HippyVirtualNode *)firstLazilyLoadTypeParentNode {
+    HippyVirtualNode *node = [self parent];
+    BOOL isNodeLazily = [node isLazilyLoadType];
+    while (!isNodeLazily && node) {
+        node = [node parent];
+        isNodeLazily = [node isLazilyLoadType];
+    }
+    return node;
+}
+
 - (BOOL)isListSubNode
 {
 	return [self listNode] != nil;
@@ -269,13 +298,13 @@
 
 - (void)insertHippySubview:(id<HippyComponent>)subview atIndex:(__unused NSInteger)atIndex
 {
-	self.needFlush = YES;
+	self.isDirty = YES;
 	[super insertHippySubview: subview atIndex: atIndex];
 }
 
 - (void)removeHippySubview:(id<HippyComponent>)subview
 {
-	self.needFlush = YES;
+	self.isDirty = YES;
 	[super removeHippySubview: subview];
 }
 @end
@@ -311,9 +340,25 @@
 - (void)hippySetFrame:(CGRect)frame
 {
 	if (!CGSizeEqualToSize(self.frame.size, CGSizeZero) && !CGSizeEqualToSize(self.frame.size, frame.size)) {
-		self.listNode.needFlush = YES;
+		self.listNode.isDirty = YES;
 	}
 	[super hippySetFrame: frame];
+}
+
+- (HippyVirtualList *)listNode {
+    HippyVirtualList *list = [self parent];
+    while (![list isKindOfClass:[HippyVirtualList class]] && list) {
+        list = [list parent];
+    }
+    return list;
+}
+
+- (BOOL)createViewLazily {
+    return YES;
+}
+
+- (BOOL)isLazilyLoadType {
+    return YES;
 }
 
 @end

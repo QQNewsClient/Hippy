@@ -50,6 +50,8 @@
 #import "HippyBaseListViewProtocol.h"
 #import "HippyMemoryOpt.h"
 #import "HippyDeviceBaseInfo.h"
+#import "HippyUIManager+Private.h"
+#import "HippyUIManager+NativeVue.h"
 
 @protocol HippyBaseListViewProtocol;
 
@@ -82,9 +84,6 @@ NSString *const HippyUIManagerRootViewKey = @"HippyUIManagerRootViewKey";
     
     NSMutableDictionary<NSNumber *, HippyShadowView *> *_shadowViewRegistry; // Hippy thread only
     NSMutableDictionary<NSNumber *, UIView *> *_viewRegistry; // Main thread only
-    
-    // Keyed by viewName
-    NSDictionary *_componentDataByName;
     
     NSMutableSet<id<HippyComponent>> *_bridgeTransactionListeners;
     
@@ -939,6 +938,7 @@ HIPPY_EXPORT_METHOD(createView:(nonnull NSNumber *)hippyTag
     // Register shadow view
     if (shadowView) {
         shadowView.hippyTag = hippyTag;
+        shadowView.owner = self.bridge;
         shadowView.viewName = viewName;
         shadowView.props = props;
         shadowView.rootTag = rootTag;
@@ -957,8 +957,13 @@ HIPPY_EXPORT_METHOD(createView:(nonnull NSNumber *)hippyTag
         
         HippyVirtualNode *node = uiManager->_nodeRegistry[hippyTag];
         
-        if ([node isListSubNode] && [node cellNode] && !viewRegistry[[[node cellNode] hippyTag]]) {
-            return ;
+        if ([node createViewLazily]) {
+            HippyVirtualNode *firstLazilyLoadTypeParentNode = [node firstLazilyLoadTypeParentNode];
+            NSNumber *tag = [firstLazilyLoadTypeParentNode hippyTag];
+            UIView *view = viewRegistry[tag];
+            if (nil == view) {
+                return;
+            }
         }
         [uiManager createViewByComponentData:componentData hippyVirtualNode:node hippyTag:hippyTag properties:newProps viewName:viewName];
     }];
@@ -967,6 +972,7 @@ HIPPY_EXPORT_METHOD(createView:(nonnull NSNumber *)hippyTag
         HippyVirtualNode *node = [componentData createVirtualNode: hippyTag props: newProps];
         if(node) {
             node.rootTag = rootTag;
+            node.owner = [uiManager bridge];
             uiManager->_nodeRegistry[hippyTag] = node;
         }
     }];
@@ -1016,6 +1022,10 @@ HIPPY_EXPORT_METHOD(createView:(nonnull NSNumber *)hippyTag
     for (NSNumber *rootTag in rootTags) {
         [self _layoutAndMount: rootTag];
     }
+}
+
+- (void)updateViewWithHippyTag:(NSNumber *)hippyTag props:(NSDictionary *)pros {
+    [self updateView:hippyTag viewName:nil props:pros];
 }
 
 HIPPY_EXPORT_METHOD(updateView:(nonnull NSNumber *)hippyTag
@@ -1239,10 +1249,10 @@ HIPPY_EXPORT_METHOD(dispatchViewManagerCommand:(nonnull NSNumber *)hippyTag
     if (_listTags.count != 0) {
         [_listTags enumerateObjectsUsingBlock:^(NSNumber * _Nonnull tag, __unused NSUInteger idx, __unused BOOL * stop) {
             HippyVirtualList *listNode = (HippyVirtualList *)self->_nodeRegistry[tag];
-            if (listNode.needFlush) {
+            if (listNode.isDirty) {
                 id <HippyBaseListViewProtocol> listView = (id <HippyBaseListViewProtocol>)self->_viewRegistry[tag];
                 if([listView flush]) {
-                    listNode.needFlush = NO;
+                    listNode.isDirty = NO;
                 }
             }
         }];
@@ -1288,19 +1298,12 @@ HIPPY_EXPORT_METHOD(measure:(nonnull NSNumber *)hippyTag
             return;
         }
         
-        // By convention, all coordinates, whether they be touch coordinates, or
-        // measurement coordinates are with respect to the root view.
-        CGRect frame = view.frame;
-        CGPoint pagePoint = [view.superview convertPoint:frame.origin toView:rootView];
-        
-        callback(@[
-                   @(frame.origin.x),
-                   @(frame.origin.y),
-                   @(frame.size.width),
-                   @(frame.size.height),
-                   @(pagePoint.x),
-                   @(pagePoint.y)
-                   ]);
+        CGRect windowFrame = [rootView convertRect:view.frame fromView:view.superview];
+
+        callback(@[@{@"width":@(CGRectGetWidth(windowFrame)),
+                     @"height": @(CGRectGetHeight(windowFrame)),
+                     @"x":@(windowFrame.origin.x),
+                     @"y":@(windowFrame.origin.y)}]);
     }];
 }
 
