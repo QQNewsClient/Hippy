@@ -132,15 +132,21 @@ public class HippyWormholeManager {
       return;
     }
 
+    ViewGroup parent = (ViewGroup) newParent;
+
     ViewGroup oldParent = (ViewGroup)(wormholeView.getParent());
     if (oldParent != newParent) {
       if (oldParent != null) {
         oldParent.removeView(wormholeView);
       }
       //todo 如果wormhole不是作为parent的唯一子节点的话，这里可能会有隐患
-      ((ViewGroup)newParent).removeAllViews();
-      ((ViewGroup)newParent).addView(wormholeView);
+      parent.removeAllViews();
+      parent.addView(wormholeView);
+    } else if (parent.indexOfChild(wormholeView) != parent.getChildCount() - 1) {
+      parent.removeAllViews();
+      parent.addView(wormholeView);
     }
+
     //将虫洞的宽高同步给oarent
     ViewGroup.LayoutParams layoutParams = newParent.getLayoutParams();
     if (layoutParams!=null && layoutParams.height != wormholeView.getHeight()) {
