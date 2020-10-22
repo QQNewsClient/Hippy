@@ -385,10 +385,15 @@ HIPPY_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
     
     HippyLogInfo(@"Running application %@ (%@)", moduleName, appParameters);
     
+    __weak typeof(self) weakSelf = self;
     [bridge enqueueJSCall:@"AppRegistry"
                    method:@"runApplication"
                      args:@[moduleName, appParameters]
-               completion:NULL];
+               completion:^{
+        if ([weakSelf.delegate respondsToSelector:@selector(rootViewRunApplicationFinished:)]) {
+            [weakSelf.delegate rootViewRunApplicationFinished:self];
+        }
+    }];
 }
 
 - (void)setSizeFlexibility:(HippyRootViewSizeFlexibility)sizeFlexibility

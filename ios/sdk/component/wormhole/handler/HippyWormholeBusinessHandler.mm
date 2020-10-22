@@ -303,6 +303,28 @@
     [self setContentViewWithWormholeId:wormholeId node:wormholeNode wrapView:wrapperView];
 }
 
+- (void)didUpdatedWormholeNode:(HippyVirtualWormholeNode *)wormholeNode userInfo:(NSDictionary *)userInfo {
+    if (!userInfo || !wormholeNode) {
+        return;
+    }
+    
+    NSString *wormholeId = userInfo[@"wormholeId"];
+    
+    if (wormholeId.length == 0) {
+        return;
+    }
+    
+    HippyWormholeFactory *wormholeFactory = [self.bridge wormholeFactory];
+    
+    // create WrapperView first
+    HippyWormholeWrapperView *wrapperView = [wormholeFactory wormholeWrapperViewForWormholeId:wormholeId];
+    if (!wrapperView) {
+        return ;
+    }
+    
+    [wrapperView updateContentViewWithUserInfo:userInfo];
+}
+
 #pragma mark -
 - (void)setContentViewWithWormholeId:(NSString *)wormholeId
                                 node:(HippyVirtualWormholeNode *)node

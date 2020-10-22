@@ -89,6 +89,14 @@
 
 - (void)setProps:(NSDictionary *)props {
     [super setProps:props];
+    
+    HippyBridge *bridge = (HippyBridge *)self.owner;
+    HippyAssert(bridge, @"can't be nil");
+    if ([bridge.wormholeDelegate respondsToSelector:@selector(didUpdatedWormholeNode:userInfo:)]) {
+        NSString *wormholeId = self.props[@"params"][@"wormholeId"];
+        [bridge.wormholeDelegate didUpdatedWormholeNode:self
+                                               userInfo:@{@"node": self, @"wormholeId": wormholeId}];
+    }
 }
 
 @end

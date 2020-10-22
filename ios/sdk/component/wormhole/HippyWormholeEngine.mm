@@ -67,6 +67,15 @@
     [self setNativeVueHandler:[NSClassFromString(@"IOSNativeVueEngine") shareInstance]];
 }
 
+- (void)launchWithWormholeBusinessHandler:(HippyWormholeBusinessHandler *)wormholeBusinessHandler {
+    if (_hasStarted) {
+        return;
+    }
+    _businessHandler = wormholeBusinessHandler;
+    _hasStarted = YES;
+    [self setNativeVueHandler:[NSClassFromString(@"IOSNativeVueEngine") shareInstance]];
+}
+
 - (BOOL)loadNativeVueDomData:(NSData *)data {
     if (!data) {
         return NO;

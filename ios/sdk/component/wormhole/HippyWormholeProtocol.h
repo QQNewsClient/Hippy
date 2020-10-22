@@ -50,6 +50,12 @@ typedef NS_ENUM(NSUInteger, HippyWormholeEvent) {
 
 - (void)didCreatedViewModel:(HippyWormholeViewModel *)wholeViewModel;
 
+/*!
+ @brief 更新wormholeNode
+ */
+- (void)didUpdatedWormholeNode:(HippyVirtualWormholeNode *)wormholeNode
+                      userInfo:(NSDictionary *)userInfo;
+
 @end
 
 NS_ASSUME_NONNULL_END

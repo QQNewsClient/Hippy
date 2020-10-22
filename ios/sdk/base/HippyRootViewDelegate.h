@@ -40,4 +40,11 @@
  */
 - (void)rootView:(HippyRootView *)rootView didLoadFinish:(BOOL)success;
 
+@optional
+
+/**
+ * Called after the JSAPI runApplication finished.
+ */
+- (void)rootViewRunApplicationFinished:(HippyRootView *)rootView;
+
 @end

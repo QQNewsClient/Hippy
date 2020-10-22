@@ -97,9 +97,11 @@ static NSInteger gWormholeBaseId = 10000;
 
 - (HippyWormholeWrapperView *)view
 {
-    UIView *nvOverlayView = _nativeVueModel.view;
-    _view = [self.bridge.wormholeDataSource wormholeViewWithWormholeId:_wormholeId nvOverlayView:nvOverlayView];
-    _view.delegate = self;
+    if (!_view || !_view.contentView) {
+        UIView *nvOverlayView = _nativeVueModel.view;
+        _view = [self.bridge.wormholeDataSource wormholeViewWithWormholeId:_wormholeId nvOverlayView:nvOverlayView];
+        _view.delegate = self;
+    }
     return _view;
 }
 
@@ -178,6 +180,12 @@ static NSInteger gWormholeBaseId = 10000;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         self->_nativeVueModel = nil;
     });
+}
+
+- (void)wrapView:(HippyWormholeWrapperView * _Nullable)wrapView updateProps:(NSDictionary *)props {
+    if ([self.delegate respondsToSelector:@selector(wormholeModelUpdate:)]) {
+        [self.delegate wormholeModelUpdate:self];
+    }
 }
 
 #pragma mark - init

@@ -20,6 +20,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)wrapView:(HippyWormholeWrapperView * _Nullable)wrapView didRemoveNativeView:(UIView *)nativeView;
 
+/*!
+ @brief 更新属性，用于判断刷新view使用
+ */
+- (void)wrapView:(HippyWormholeWrapperView * _Nullable)wrapView updateProps:(NSDictionary *)props;
+
 @end
 
 #pragma mark - Interface
@@ -27,6 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, weak) id<HippyWormholeWrapperViewDelegate> delegate;
 @property(nonatomic, weak) HippyVirtualWormholeNode *wormholeNode;
+@property(nonatomic, strong, readonly) UIView *contentView;
 
 - (instancetype)initWithWormholeId:(NSString *)wormholeId natvieView:(UIView * _Nullable)nativeView;
 - (instancetype)initWithFrame:(CGRect)frame NS_UNAVAILABLE;
@@ -35,6 +41,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setContentView:(UIView *)contentView;
 - (void)clearContentView;
 
+/*!
+ @brief 更新contentView内容
+ */
+- (void)updateContentViewWithUserInfo:(NSDictionary *)userInfo;
 
 @end
 

@@ -63,6 +63,10 @@
     }
 }
 
+- (UIView *)contentView {
+    return _contentView;
+}
+
 - (void)clearContentView
 {
     if (_contentView)
@@ -82,6 +86,10 @@
         }
         _contentView = nil;
     }
+}
+
+- (void)updateContentViewWithUserInfo:(NSDictionary *)userInfo {
+    [self.delegate wrapView:self updateProps:userInfo];
 }
 
 - (void)setDelegate:(id<HippyWormholeWrapperViewDelegate>)delegate{

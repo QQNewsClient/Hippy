@@ -23,6 +23,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)wormholeViewModel:(HippyWormholeViewModel *)viewModel didChangedSize:(CGSize)size;
 
+/*!
+ @brief 更新wormhole
+ */
+- (void)wormholeModelUpdate:(HippyWormholeViewModel *)viewModel;
+
 @end
 
 @class HippyWormholeBusinessHandler;

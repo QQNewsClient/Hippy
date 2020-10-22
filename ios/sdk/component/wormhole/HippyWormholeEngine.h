@@ -54,6 +54,12 @@ NS_ASSUME_NONNULL_BEGIN
              isDebug:(BOOL)isDebug;
 
 /**
+ * launch Wormhole Engine.
+ * @wormholeBusinessHandler: business custom wormholeBusinessHandler.
+ */
+- (void)launchWithWormholeBusinessHandler:(HippyWormholeBusinessHandler *)wormholeBusinessHandler;
+
+/**
  * load native vue file
  * @data: native vue dom data
  */
