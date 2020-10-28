@@ -20,10 +20,10 @@ public class HippyWormholeController extends HippyViewController<HippyWormholeVi
 
   @Override
   protected View createViewImpl(final Context context, HippyMap iniProps) {
-    HippyWormholeView wormholeView = new HippyWormholeView(context);
+    View wormholeView = createViewImpl(context);
     String wormholeId = HippyWormholeManager.getInstance().getWormholeIdFromProps(iniProps);
     if (!TextUtils.isEmpty(wormholeId)) {
-      wormholeView.setWormholeId(wormholeId);
+      ((HippyWormholeView)wormholeView).setWormholeId(wormholeId);
     }
     HippyWormholeManager.getInstance().addNativeWormholeChild(wormholeId, wormholeView);
     return wormholeView;
