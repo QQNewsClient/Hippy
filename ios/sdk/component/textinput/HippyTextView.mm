@@ -94,23 +94,22 @@
 
 @implementation HippyTextView
 {
-    NSString *_placeholder;
-    UITextView *_placeholderView;
-    HippyText *_richTextView;
-    NSAttributedString *_pendingAttributedText;
-    UIScrollView *_scrollView;
-    
-    UITextRange *_previousSelectionRange;
-    NSUInteger _previousTextLength;
-    CGFloat _previousContentHeight;
-    NSString *_predictedText;
-    
-    BOOL _blockTextShouldChange;
-    BOOL _nativeUpdatesInFlight;
-    NSInteger _nativeEventCount;
-    
-    CGSize _previousContentSize;
-    BOOL _viewDidCompleteInitialLayout;
+  NSString *_placeholder;
+  UITextView *_placeholderView;
+  HippyText *_richTextView;
+  NSAttributedString *_pendingAttributedText;
+
+  UITextRange *_previousSelectionRange;
+  NSUInteger _previousTextLength;
+  CGFloat _previousContentHeight;
+  NSString *_predictedText;
+
+  BOOL _blockTextShouldChange;
+  BOOL _nativeUpdatesInFlight;
+  NSInteger _nativeEventCount;
+
+  CGSize _previousContentSize;
+  BOOL _viewDidCompleteInitialLayout;
 }
 
 //当键盘出现或改变时调用
@@ -132,33 +131,27 @@
 
 - (instancetype)init
 {
-    if ((self = [super initWithFrame:CGRectZero])) {
-        //    _contentInset = UIEdgeInsetsZero;
-        [self setContentInset:UIEdgeInsetsZero];
-        _placeholderTextColor = [self defaultPlaceholderTextColor];
-        _blurOnSubmit = NO;
-        
-        _textView = [[HippyUITextView alloc] initWithFrame:CGRectZero];
-        _textView.responderDelegate = self;
-        _textView.backgroundColor = [UIColor clearColor];
-        _textView.textColor = [UIColor blackColor];
-        _textView.scrollsToTop = NO;
-        _textView.scrollEnabled = NO;
-        _textView.delegate = self;
-        
-        _scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
-        _scrollView.scrollsToTop = NO;
-        [_scrollView addSubview:_textView];
-        
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(textFieldEditChanged:)
-                                                     name:UITextViewTextDidChangeNotification
-                                                   object:_textView];
-        
-        [self addSubview:_scrollView];
-    }
-    return self;
+  if ((self = [super initWithFrame:CGRectZero])) {
+//    _contentInset = UIEdgeInsetsZero;
+    [self setContentInset:UIEdgeInsetsZero];
+    _placeholderTextColor = [self defaultPlaceholderTextColor];
+    _blurOnSubmit = NO;
+
+    _textView = [[HippyUITextView alloc] initWithFrame:CGRectZero];
+		_textView.responderDelegate = self;
+    _textView.backgroundColor = [UIColor clearColor];
+    _textView.textColor = [UIColor blackColor];
+    _textView.scrollsToTop = NO;
+    _textView.delegate = self;
+      
+      [[NSNotificationCenter defaultCenter] addObserver:self
+                                               selector:@selector(textFieldEditChanged:)
+                                                   name:UITextViewTextDidChangeNotification
+                                                 object:_textView];
+      
+    [self addSubview:_textView];
+  }
+  return self;
 }
 
 HIPPY_NOT_IMPLEMENTED(- (instancetype)initWithFrame:(CGRect)frame)
@@ -279,47 +272,31 @@ static NSAttributedString *removeHippyTagFromString(NSAttributedString *string)
 
 - (void)updateFrames
 {
-    // Adjust the insets so that they are as close as possible to single-line
-    // HippyTextField defaults, using the system defaults of font size 17 and a
-    // height of 31 points.
-    //
-    // We apply the left inset to the frame since a negative left text-container
-    // inset mysteriously causes the text to be hidden until the text view is
-    // first focused.
-    UIEdgeInsets adjustedFrameInset = UIEdgeInsetsZero;
-    adjustedFrameInset.left = [self contentInset].left - 5;
-    
-    UIEdgeInsets adjustedTextContainerInset = [self contentInset];
-    //  adjustedTextContainerInset.top += 5;
-    adjustedTextContainerInset.left = 0;
-    
-    CGRect frame = UIEdgeInsetsInsetRect(self.bounds, adjustedFrameInset);
-    _textView.frame = frame;
-    _placeholderView.frame = frame;
-    _scrollView.frame = frame;
-    [self updateContentSize];
-    
-    _textView.textContainerInset = adjustedTextContainerInset;
-    _placeholderView.textContainerInset = adjustedTextContainerInset;
+  // Adjust the insets so that they are as close as possible to single-line
+  // HippyTextField defaults, using the system defaults of font size 17 and a
+  // height of 31 points.
+  //
+  // We apply the left inset to the frame since a negative left text-container
+  // inset mysteriously causes the text to be hidden until the text view is
+  // first focused.
+  UIEdgeInsets adjustedFrameInset = UIEdgeInsetsZero;
+  adjustedFrameInset.left = [self contentInset].left - 5;
+
+  UIEdgeInsets adjustedTextContainerInset = [self contentInset];
+//  adjustedTextContainerInset.top += 5;
+  adjustedTextContainerInset.left = 0;
+
+  CGRect frame = UIEdgeInsetsInsetRect(self.bounds, adjustedFrameInset);
+  _textView.frame = frame;
+  _placeholderView.frame = frame;
+  [self updateContentSize];
+
+  _textView.textContainerInset = adjustedTextContainerInset;
+  _placeholderView.textContainerInset = adjustedTextContainerInset;
 }
 
 - (void)updateContentSize
 {
-    CGSize size = (CGSize){_scrollView.frame.size.width, INFINITY};
-    size.height = [_textView sizeThatFits:size].height;
-    _scrollView.contentSize = size;
-    _textView.frame = (CGRect){CGPointZero, size};
-    
-    if (_viewDidCompleteInitialLayout && _onContentSizeChange && !CGSizeEqualToSize(_previousContentSize, size)) {
-        _previousContentSize = size;
-        _onContentSizeChange(@{
-            @"contentSize": @{
-                    @"height": @(size.height),
-                    @"width": @(size.width),
-            },
-            @"target": self.hippyTag,
-                             });
-    }
 }
 
 - (void)updatePlaceholder
