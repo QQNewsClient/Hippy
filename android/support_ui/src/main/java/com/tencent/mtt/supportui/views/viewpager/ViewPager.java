@@ -3875,10 +3875,32 @@ public class ViewPager extends ViewGroup implements ScrollChecker.IScrollCheck
 		}
 	}
 
-	protected boolean onStartDrag(boolean left)
-	{
-		return true;
-	}
+  @Override
+  public boolean canScrollHorizontally(int direction) {
+    // 安卓端其他联动组件会依赖本方法做判断，原来的实现始终返回false会导致判断异常，滑动有冲突
+    if (!mScrollEnabled) {
+      return false;
+    }
+    return horizontalCanScroll(direction);
+  }
+
+  @Override
+  public boolean canScrollVertically(int direction) {
+    // 安卓端其他联动组件会依赖本方法做判断，原来的实现始终返回false会导致判断异常，滑动有冲突
+    if (!mScrollEnabled) {
+      return false;
+    }
+    return verticalCanScroll(direction);
+  }
+
+	protected boolean onStartDrag(boolean left) {
+    // 当hippy的ViewPager存在嵌套时，判断边界始终返回的是true，导致频繁发送 requestDisallowIntercept，嵌套的pager无法联动
+    if (left) {
+      return horizontalCanScroll(1);
+    } else {
+      return horizontalCanScroll(-1);
+    }
+  }
 
 	/**
 	 * Start a fake drag of the pager.
