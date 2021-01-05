@@ -141,7 +141,7 @@ public class ViewPager extends ViewGroup implements ScrollChecker.IScrollCheck
 	/* private */ Drawable								mMarginDrawable;
 	/* private */ int									mTopPageBounds;
 	/* private */ int									mBottomPageBounds;
-	/* private */ boolean								mScrollEnabled					= true;
+	protected boolean								mScrollEnabled					= true;
 	boolean												mForceUnableToDrag				= false;
 	// Offsets of the first and last items, if known.
 	// Set during population, used to determine if we are at the beginning

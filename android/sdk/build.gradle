@@ -520,7 +520,7 @@ publish {
   repoName = repo
   groupId = group
   artifactId = 'hippy'
-  publishVersion = '2.0.40'
+  publishVersion = '2.0.41'
   dryRun = false
   desc = 'Hippy library for Android'
   website = 'https://github.com/QQNewsClient/Hippy.git'
