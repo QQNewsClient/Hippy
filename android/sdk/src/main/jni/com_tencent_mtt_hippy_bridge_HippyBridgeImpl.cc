@@ -46,6 +46,17 @@ namespace napi = ::hippy::napi;
 std::string LucasTestBussinessCalledCache;
 
 namespace {
+
+void ReportDebugInfo(V8Runtime* runtime, std::string desc_msg, std::string stack_msg) {
+  std::stringstream report_stream;
+  std::stringstream stack_stream;
+  report_stream << "HippyCore report desc = " << desc_msg;
+  stack_stream << "HippyCore report stack = " << stack_msg;
+  ExceptionHandler::reportJsException(runtime->isolate, report_stream,
+                                      stack_stream);
+}
+
+
 void CallJavaMethod(jobject obj, jlong value) {
   jclass javaClass = nullptr;
 
@@ -239,10 +250,11 @@ Java_com_tencent_mtt_hippy_bridge_HippyBridgeImpl_initJSFramework(
     v8::Context::Scope context_scope(context);
     v8::Local<v8::Object> globalObject = context->Global();
     context->SetEmbedderData(0, v8::External::New(isolate, (void*)runtime));
-
+    ReportDebugInfo(runtime, "js thread init context success", "");
     // for v8 inspector debug
     if (runtime->bIsDevModule) {
       //HIPPY_LOG(hippy::Debug, "initJSFramework init inspector for debug");
+      ReportDebugInfo(runtime, "initJSFramework init inspector for debug", "");
       V8InspectorClientImpl::initInspectorClient(runtime);
     }
 
@@ -255,11 +267,14 @@ Java_com_tencent_mtt_hippy_bridge_HippyBridgeImpl_initJSFramework(
 
     HippyNativeGlobal globalConfig;
     globalConfig.registerGlobal(char_globalConfig_tmp, runtime);
+    ReportDebugInfo(runtime, "initJSFramework registerGlobal success", "");
 
     // load bootstrap.js after load config
     if (environment) {
       environment->loadModules();
     }
+
+    ReportDebugInfo(runtime, "initJSFramework loadModules success", "");
 
     if (char_globalConfig_tmp) {
       free(char_globalConfig_tmp);
@@ -269,6 +284,8 @@ Java_com_tencent_mtt_hippy_bridge_HippyBridgeImpl_initJSFramework(
     jlong value = reinterpret_cast<jlong>(runtime);
     CallJavaMethod(save_object_->obj(), value);
 
+    ReportDebugInfo(runtime, "js thread initJSFramework success", "");
+
     //HIPPY_LOG(hippy::Debug, "initJSFramework leave task");
   };
 
@@ -277,6 +294,7 @@ Java_com_tencent_mtt_hippy_bridge_HippyBridgeImpl_initJSFramework(
   }
 
   //HIPPY_LOG(hippy::Debug, "initJSFramework end");
+  ReportDebugInfo(runtime, "initJSFramework success", "");
 
   return reinterpret_cast<jlong>(runtime);
 }
@@ -293,9 +311,9 @@ Java_com_tencent_mtt_hippy_bridge_HippyBridgeImpl_runScriptFromFile(
     jobject jcallback) {
   //HIPPY_LOG(hippy::Debug, "runScriptFromFile start");
 
-  /*auto time1 = std::chrono::time_point_cast<std::chrono::milliseconds>(
+  auto run_script_begin_time = std::chrono::time_point_cast<std::chrono::milliseconds>(
                     std::chrono::system_clock::now())
-                    .time_since_epoch().count();*/
+                    .time_since_epoch().count();
 
   if (v8RuntimePtr == 0) {
     return false;
@@ -323,17 +341,19 @@ Java_com_tencent_mtt_hippy_bridge_HippyBridgeImpl_runScriptFromFile(
   std::shared_ptr<JavaScriptTask> task = std::make_shared<JavaScriptTask>();
   task->callback = [v8RuntimePtr, save_object_ = std::move(save_object),
                     char_filePath_copy, char_scriptName_copy,
-                    char_codeCacheDir_copy, canUseCodeCache] {
+                    char_codeCacheDir_copy, canUseCodeCache,
+                    run_script_begin_time] {
     //HIPPY_LOG(hippy::Debug, "runScriptFromFile enter tast");
 
     char* char_filePath_copy_tmp = char_filePath_copy;
     char* char_scriptName_copy_tmp = char_scriptName_copy;
     char* char_codeCacheDir_copy_tmp = char_codeCacheDir_copy;
 
-	/*auto time2 = std::chrono::time_point_cast<std::chrono::milliseconds>(
+	auto js_run_script_begin_time =
+        std::chrono::time_point_cast<std::chrono::milliseconds>(
                      std::chrono::system_clock::now())
                      .time_since_epoch()
-                     .count();*/
+                     .count();
 
     std::vector<char> buf;
     {
@@ -403,10 +423,20 @@ Java_com_tencent_mtt_hippy_bridge_HippyBridgeImpl_runScriptFromFile(
 
     //HIPPY_LOG(hippy::Debug, "runScriptFromFile leave tast");
 
-	/*auto time5 = std::chrono::time_point_cast<std::chrono::milliseconds>(
+	auto js_run_script_end_time =
+        std::chrono::time_point_cast<std::chrono::milliseconds>(
                      std::chrono::system_clock::now())
                      .time_since_epoch()
-                     .count();*/
+                     .count();
+
+  V8Runtime* runtime = reinterpret_cast<V8Runtime*>(v8RuntimePtr);
+  std::string js_run_time = "js_run_time = " +
+      std::to_string(js_run_script_end_time - js_run_script_begin_time) +
+      ", run_time = " +
+      std::to_string(js_run_script_end_time - run_script_begin_time);
+
+  ReportDebugInfo(runtime, js_run_time, "");
+ 
 
 	//HIPPY_LOG(hippy::Debug, "LucasTimeTest pre_time=%d load_js=%d run_js=%d after_time=%d total=%d", time2-time1, time3-time2, time4-time3, time5-time4, time5-time1);
 
@@ -844,8 +874,9 @@ bool runScript(const char* script,
   std::vector<char> code_cache_data;
   jstring jCodeCacheFile = NULL;
 
+  V8Runtime* runtime = reinterpret_cast<V8Runtime*>(v8RuntimePtr);
   if (script == NULL || script_name == NULL) {
-    HIPPY_LOG(hippy::Error, "runScript stript == NULL || script_name == NULL");
+    ReportDebugInfo(runtime, "runScript stript == NULL || script_name == NULL", "");
     return false;
   }
 
@@ -879,11 +910,13 @@ bool runScript(const char* script,
       delete md5;
     }
     md5 = NULL;
+
+    ReportDebugInfo(runtime, "code cache complete", "");
   }
 
-  V8Runtime* runtime = reinterpret_cast<V8Runtime*>(v8RuntimePtr);
   if (runtime->isolate == NULL) {
     JNIEnvironment::AttachCurrentThread()->DeleteLocalRef(jCodeCacheFile);
+    ReportDebugInfo(runtime, "runtime->isolate = NULL", "");
     return false;
   }
 
@@ -899,6 +932,7 @@ bool runScript(const char* script,
         runtime->hippyBridge,
         JNIEnvironment::getInstance()->wrapper.postCodeCacheRunnableMethodID,
         jCodeCacheFile, 0);
+    ReportDebugInfo(runtime, "runtime->isolate = NULL", "");
     return false;
   }
   // napi::napi_context napi_ctx = runtime->env->getContext();
@@ -919,6 +953,7 @@ bool runScript(const char* script,
     v8::ScriptCompiler::Source script_source(v8Source, origin, cached_data);
     v8Script = v8::ScriptCompiler::Compile(
         context, &script_source, v8::ScriptCompiler::kConsumeCodeCache);
+    ReportDebugInfo(runtime, "compile complete", "");
   } else {
     if (canUseCodeCache) {
       v8::ScriptCompiler::Source script_source(v8Source, origin);
@@ -942,9 +977,11 @@ bool runScript(const char* script,
             jCodeCacheFile, reinterpret_cast<jlong>(runnable));
         JNIEnvironment::clearJEnvException(
             JNIEnvironment::AttachCurrentThread());
+        ReportDebugInfo(runtime, "gen code cache", "");
       }
     } else {
       v8Script = v8::Script::Compile(context, v8Source, &origin);
+      ReportDebugInfo(runtime, "canUseCodeCache compile complete", "");
     }
   }
 
@@ -959,6 +996,8 @@ bool runScript(const char* script,
       flag = true;
     }
   }
+
+  ReportDebugInfo(runtime, "runScript flag = " + std::to_string(flag), "");
 
   //HIPPY_LOG(hippy::Debug, "runScript end");
   return flag;

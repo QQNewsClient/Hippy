@@ -10,6 +10,9 @@
 void ExceptionHandler::reportJsException(v8::Isolate* isolate,
                                          std::stringstream& description_stream,
                                          std::stringstream& stack_stream) {
+  if (!isolate) {
+    return;
+  }
   v8::HandleScope handle_scope(isolate);
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
   v8::Context::Scope context_scope(context);
