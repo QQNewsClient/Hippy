@@ -161,6 +161,7 @@ public abstract class HippyEngineManagerImpl extends HippyEngineManager implemen
 		if (listener != null)
 			mEventListeners.add(listener);
 
+		mGlobalConfigs.getEngineMonitorAdapter().startInitEngine();
 		mGlobalConfigs.getEngineMonitorAdapter().reportEngineLoadStart();
 		mHandler.removeMessages(MSG_ENGINE_INIT_TIMEOUT);
 
@@ -487,6 +488,7 @@ public abstract class HippyEngineManagerImpl extends HippyEngineManager implemen
 
 	void notifyEngineInitialized(int statusCode, Throwable e)
 	{
+	  mGlobalConfigs.getEngineMonitorAdapter().endInitEngine();
 		mHandler.removeMessages(MSG_ENGINE_INIT_TIMEOUT);
 		if (mPreloadBundleLoader != null)
 		{
@@ -564,7 +566,7 @@ public abstract class HippyEngineManagerImpl extends HippyEngineManager implemen
 			@Override
 			public void callback(Boolean param, Throwable e)
 			{
-				if (mCurrentState != EngineState.INITING && mCurrentState != EngineState.ONRESTART)
+        if (mCurrentState != EngineState.INITING && mCurrentState != EngineState.ONRESTART)
 				{
 					LogUtils.e(TAG, "initBridge callback error STATUS_WRONG_STATE, state=" + mCurrentState);
 					notifyEngineInitialized(STATUS_WRONG_STATE, e);

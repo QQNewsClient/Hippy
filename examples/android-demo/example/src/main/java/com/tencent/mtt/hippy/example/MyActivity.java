@@ -55,7 +55,7 @@ public class MyActivity extends Activity
       }
     });
 
-    if(true) {
+    if(false) {
       setContentView(R.layout.list);
     } else
     // 1/3. 初始化hippy引擎

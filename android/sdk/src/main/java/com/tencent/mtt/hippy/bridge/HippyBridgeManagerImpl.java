@@ -118,6 +118,7 @@ public class HippyBridgeManagerImpl implements HippyBridgeManager, HippyBridge.B
 						mHippyBridge.initJSBridge(getGlobalConfigs(), new NativeCallback(mHandler) {
 							@Override
 							public void Call(long value, Message msg, String action) {
+                mContext.getGlobalConfigs().getEngineMonitorAdapter().endInitJsBridge();
 
 								if (mThirdPartyAdapter != null) {
 									mThirdPartyAdapter.SetHippyBridgeId(value);
@@ -129,7 +130,8 @@ public class HippyBridgeManagerImpl implements HippyBridgeManager, HippyBridge.B
 									mCoreBundleLoader.load(mHippyBridge, new NativeCallback(mHandler) {
 										@Override
 										public void Call(long value, Message msg, String action) {
-											mIsInit = value == 1;
+                      mContext.getGlobalConfigs().getEngineMonitorAdapter().endLoadCommonJs();
+                      mIsInit = value == 1;
 											RuntimeException exception = null;
 											if (!mIsInit) {
 												exception = new RuntimeException("load coreJsBundle failed,check your core jsBundle");

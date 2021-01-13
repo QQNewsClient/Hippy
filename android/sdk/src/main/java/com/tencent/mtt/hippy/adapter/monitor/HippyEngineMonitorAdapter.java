@@ -28,6 +28,7 @@ import java.util.List;
 public interface HippyEngineMonitorAdapter
 {
 
+  String TAG = "HippyEngineMonitorAdapter";
 	int	ENGINE_LOAD_RESULT_SUCCESS	= 0;
 	int	ENGINE_LOAD_RESULT_ERROR	= 1;
 	int	ENGINE_LOAD_RESULE_TIMEOUT	= 2;
@@ -42,4 +43,16 @@ public interface HippyEngineMonitorAdapter
 
 	void reportBridgeANR(String message);
 
+  /**
+   * 以下接口是为了排查init engine timeout临时引入
+   * <p>
+   * initEngine分两个流程：initJsBridge & 加载common js，排查看看卡在了哪个流程先
+   */
+  void startInitEngine();
+
+  void endInitJsBridge();
+
+  void endLoadCommonJs();
+
+  void endInitEngine();
 }

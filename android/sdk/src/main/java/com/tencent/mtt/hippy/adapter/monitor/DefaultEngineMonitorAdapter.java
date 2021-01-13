@@ -16,6 +16,7 @@
 package com.tencent.mtt.hippy.adapter.monitor;
 
 import com.tencent.mtt.hippy.HippyRootView;
+import com.tencent.mtt.hippy.utils.LogUtils;
 
 import java.util.List;
 
@@ -31,20 +32,18 @@ public class DefaultEngineMonitorAdapter implements HippyEngineMonitorAdapter
 	@Override
 	public void reportEngineLoadStart()
 	{
-
+    LogUtils.d(TAG, "reportEngineLoadStart");
 	}
 
 	@Override
 	public void reportEngineLoadResult(int code, int loadTime, List<HippyEngineMonitorEvent> loadEvents, Throwable e)
 	{
-
 	}
 
 	@Override
 	public void reportModuleLoadComplete(HippyRootView rootView, int loadTime, List<HippyEngineMonitorEvent> loadEvents)
 	{
-
-	}
+  }
 
 	@Override
 	public boolean needReportBridgeANR()
@@ -57,4 +56,26 @@ public class DefaultEngineMonitorAdapter implements HippyEngineMonitorAdapter
 	{
 
 	}
+
+  @Override
+  public void startInitEngine() {
+    LogUtils.d(TAG, "startInitEngine");
+
+  }
+
+  @Override
+  public void endInitJsBridge() {
+    LogUtils.d(TAG, "endInitJsBridge");
+  }
+
+  @Override
+  public void endLoadCommonJs() {
+    LogUtils.d(TAG, "endLoadCommonJs");
+
+  }
+
+  @Override
+  public void endInitEngine() {
+    LogUtils.d(TAG, "endInitEngine");
+  }
 }
