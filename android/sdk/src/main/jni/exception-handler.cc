@@ -15,6 +15,9 @@ void ExceptionHandler::reportJsException(v8::Isolate* isolate,
   }
   v8::HandleScope handle_scope(isolate);
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
+  if (context.IsEmpty()) {
+    return;
+  }
   v8::Context::Scope context_scope(context);
 
   JNIEnv* env = JNIEnvironment::AttachCurrentThread();
