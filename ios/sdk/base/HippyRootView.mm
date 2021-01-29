@@ -391,7 +391,7 @@ HIPPY_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
                      args:@[moduleName, appParameters]
                completion:^{
         if ([weakSelf.delegate respondsToSelector:@selector(rootViewRunApplicationFinished:)]) {
-            [weakSelf.delegate rootViewRunApplicationFinished:self];
+            [weakSelf.delegate rootViewRunApplicationFinished:weakSelf];
         }
     }];
 }
