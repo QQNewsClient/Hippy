@@ -291,18 +291,28 @@ public class HippyImageView extends AsyncImageView implements CommonBorder, Hipp
 				((CommonBackgroundDrawable) oldBGDrawable).setBackgroundColor(defaultBackgroundColor);
 				setCustomBackgroundDrawable((CommonBackgroundDrawable) oldBGDrawable);
 			}
-			else if (oldBGDrawable instanceof LayerDrawable)
-			{
-				if (((LayerDrawable) oldBGDrawable).getNumberOfLayers() > 0)
-				{
-					Drawable lastBgDrawable = ((LayerDrawable) oldBGDrawable).getDrawable(0);
-					if (lastBgDrawable instanceof CommonBackgroundDrawable)
-					{
-						((CommonBackgroundDrawable) lastBgDrawable).setBackgroundColor(defaultBackgroundColor);
-						setCustomBackgroundDrawable((CommonBackgroundDrawable) lastBgDrawable);
-					}
-				}
-			}
+			else if (oldBGDrawable instanceof LayerDrawable) {
+        int layerNum = ((LayerDrawable) oldBGDrawable).getNumberOfLayers();
+        if (layerNum > 0) {
+          Drawable lastBgDrawable = ((LayerDrawable) oldBGDrawable).getDrawable(0);
+          if (lastBgDrawable instanceof CommonBackgroundDrawable) {
+            ((CommonBackgroundDrawable) lastBgDrawable).setBackgroundColor(defaultBackgroundColor);
+            setCustomBackgroundDrawable((CommonBackgroundDrawable) lastBgDrawable);
+          }
+        }
+        if (layerNum > 1) {
+          Drawable layer1Drawable = ((LayerDrawable) oldBGDrawable).getDrawable(1);
+          if (layer1Drawable instanceof HippyContentDrawable) {
+            HippyContentDrawable layer1 = (HippyContentDrawable) layer1Drawable;
+            if (mBGDrawable != null) {
+              layer1.setBorder(mBGDrawable.getBorderRadiusArray(), mBGDrawable.getBorderWidthArray());
+              setBackgroundDrawable(new LayerDrawable(new Drawable[]{mBGDrawable, layer1}));
+            } else {
+              setBackgroundDrawable(layer1Drawable);
+            }
+          }
+        }
+      }
 			super.setBackgroundColor(defaultBackgroundColor);
 			mHasSetTempBackgroundColor = true;
 		}
@@ -326,9 +336,9 @@ public class HippyImageView extends AsyncImageView implements CommonBorder, Hipp
 	}
 
 	@Override
-	protected void updateContentDrawableProperty()
+	protected void updateContentDrawableProperty(Bitmap bitmap)
 	{
-		super.updateContentDrawableProperty();
+		super.updateContentDrawableProperty(bitmap);
     if (mContentDrawable instanceof HippyContentDrawable) {
       ((HippyContentDrawable) mContentDrawable).setNinePatchCoordinate(mNinePatchRect);
     }

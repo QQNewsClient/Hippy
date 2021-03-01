@@ -456,13 +456,13 @@ public class AsyncImageView extends ViewGroup implements Animator.AnimatorListen
 			onSetContent(mUrl);
 			if (sourceType == SOURCE_TYPE_SRC && mSourceDrawable != null)
 			{
-				updateContentDrawableProperty();
+        updateContentDrawableProperty(mSourceDrawable.getBitmap());
 			}
 			else if (sourceType == SOURCE_TYPE_DEFAULT_SRC && mDefaultSourceDrawable != null)
 			{
 				if (mContentDrawable instanceof ContentDrawable && (mUrlFetchState != IMAGE_LOADED || mSourceDrawable == null))
 				{
-					((ContentDrawable) mContentDrawable).setBitmap(mDefaultSourceDrawable.getBitmap());
+          updateContentDrawableProperty(mDefaultSourceDrawable.getBitmap());
 				}
 			}
 			if (mBGDrawable != null)
@@ -484,11 +484,11 @@ public class AsyncImageView extends ViewGroup implements Animator.AnimatorListen
 		}
 	}
 
-	protected void updateContentDrawableProperty()
+	protected void updateContentDrawableProperty(Bitmap bitmap)
 	{
 		if (mContentDrawable instanceof ContentDrawable)
 		{
-			((ContentDrawable) mContentDrawable).setBitmap(getBitmap());
+			((ContentDrawable) mContentDrawable).setBitmap(bitmap);
 			((ContentDrawable) mContentDrawable).setTintColor(getTintColor());
 			((ContentDrawable) mContentDrawable).setScaleType(mScaleType);
 			((ContentDrawable) mContentDrawable).setImagePositionX(mImagePositionX);
