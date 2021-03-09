@@ -120,7 +120,18 @@ android {
                   "-DCMAKE_BUILD_TYPE=Debug",
                   "-DV8_VERSION=$V8_VERSION"
 
-          abiFilters 'arm64-v8a'
+          if (INCLUDE_ABI_ARMEABI_V7A.toBoolean() || INCLUDE_ABI_ARMEABI.toBoolean()) {
+            abiFilters 'armeabi-v7a'
+          }
+          if (INCLUDE_ABI_ARM64_V8A.toBoolean()) {
+            abiFilters 'arm64-v8a'
+          }
+          if (INCLUDE_ABI_X86.toBoolean()) {
+            abiFilters 'x86'
+          }
+          if (INCLUDE_ABI_X86_64.toBoolean()) {
+            abiFilters 'x86_64'
+          }
         }
       }
     }
