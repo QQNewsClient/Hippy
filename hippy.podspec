@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'hippy'
-  s.version          = '2.5.5'
+  s.version          = '2.5.3'
   s.summary          = 'hippy lib for ios'
 
 # This description is used to generate tags and improve search results.
@@ -34,7 +34,7 @@ TODO: Add long description of the pod here.
     cores.exclude_files = ['core/include/core/napi/v8','core/src/napi/v8','core/js']
     cores.libraries = 'c++'
     cores.header_mappings_dir = 'core/include/'
-  end 
+  end
 
   if ENV['hippy_use_frameworks']
   else
