@@ -308,6 +308,13 @@
     if (!self.needsLayoutItems) {
         return;
     }
+    
+    [self adjustContentSizeAndPageIndexWhenLayout];
+    
+    self.needsLayoutItems = NO;
+}
+
+- (void)adjustContentSizeAndPageIndexWhenLayout {
     if (!self.viewPagerItems.count)
         return;
     for (int i = 1; i < self.viewPagerItems.count; ++i) {
@@ -352,7 +359,6 @@
         }
     }
     [self setPage:_lastPageIndex animated:YES];
-    self.needsLayoutItems = NO;
 }
 
 - (NSUInteger)nowPage {
