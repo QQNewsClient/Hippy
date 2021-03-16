@@ -18,6 +18,15 @@ android {
         minSdkVersion 14
         // noinspection ExpiredTargetSdkVersion
         targetSdkVersion 29
+        ndk {
+          abiFilter "armeabi-v7a" // 需要手动指定filter，否则apk包里没有so库，启动会crash
+        }
+    }
+
+    sourceSets {
+      main {
+        jniLibs.srcDirs = ['libs']
+      }
     }
 
     signingConfigs {

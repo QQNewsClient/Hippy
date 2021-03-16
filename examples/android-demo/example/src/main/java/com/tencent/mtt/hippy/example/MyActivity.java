@@ -6,8 +6,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Window;
 
-import com.tencent.mtt.hippy.HippyEngine;
 import com.tencent.mtt.hippy.HippyAPIProvider;
+import com.tencent.mtt.hippy.HippyEngine;
 import com.tencent.mtt.hippy.HippyRootView;
 import com.tencent.mtt.hippy.adapter.exception.HippyExceptionHandlerAdapter;
 import com.tencent.mtt.hippy.common.HippyJsException;
@@ -42,20 +42,20 @@ public class MyActivity extends Activity
 		super.onCreate(savedInstanceState);
 		getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
-    mHippyWormholeEngine = new HippyWormholeEngine();
-    mHippyWormholeEngine.init(this, new Runnable() {
-      @Override
-      public void run() {
-        RecyclerView recyclerView = findViewById(R.id.recyclerview);
-        MyAdapter adapter = new MyAdapter(mHippyWormholeEngine);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(MyActivity.this);
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
-      }
-    });
-
-    if(true) {
+		boolean debugWormhole = false;
+    if(debugWormhole) {
+      mHippyWormholeEngine = new HippyWormholeEngine();
+      mHippyWormholeEngine.init(this, new Runnable() {
+        @Override
+        public void run() {
+          RecyclerView recyclerView = findViewById(R.id.recyclerview);
+          MyAdapter adapter = new MyAdapter(mHippyWormholeEngine);
+          LinearLayoutManager layoutManager = new LinearLayoutManager(MyActivity.this);
+          layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+          recyclerView.setLayoutManager(layoutManager);
+          recyclerView.setAdapter(adapter);
+        }
+      });
       setContentView(R.layout.list);
     } else
     // 1/3. 初始化hippy引擎
