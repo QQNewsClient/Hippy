@@ -14,11 +14,11 @@ import com.tencent.mtt.hippy.uimanager.ControllerManager;
 import com.tencent.mtt.hippy.uimanager.HippyViewController;
 import com.tencent.mtt.hippy.uimanager.RenderNode;
 
-@HippyController(name = WaterFallComponentName.WATERFALL_ITEM, isLazyLoad = true)
+@HippyController(name = WaterFallComponentName.ITEM, isLazyLoad = true)
 public class HippyQBWaterfallItemViewController extends
   HippyViewController<HippyQBWaterfallItemView> {
 
-  static final String TAG = WaterFallComponentName.WATERFALL_ITEM;
+  static final String TAG = WaterFallComponentName.ITEM;
 
   @Override
   protected View createViewImpl(Context context) {

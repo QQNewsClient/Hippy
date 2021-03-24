@@ -60,7 +60,7 @@ public class DebugUtil {
 
     if (HippyTextViewController.CLASS_NAME.equals(node.getClassName())) {
       handleStringifyWhenClassNameIsHippyTextView(node, sb);
-    } else if (WaterFallComponentName.WATERFALL_ITEM.equals(node.getClassName())) {
+    } else if (WaterFallComponentName.ITEM.equals(node.getClassName())) {
       int type = ((HippyQBWaterfallItemRenderNode) node).getType();
       sb.append("<type=").append(type).append(">");
     } else if (HippyImageViewController.CLASS_NAME.equals(node.getClassName())) {

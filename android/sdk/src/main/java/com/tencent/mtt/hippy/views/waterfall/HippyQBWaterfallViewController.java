@@ -19,10 +19,10 @@ import com.tencent.mtt.supportui.views.recyclerview.IRecyclerViewFooter;
 /**
  * Created by leonardgong on 2017/12/7 0007.
  */
-@HippyController(name = WaterFallComponentName.WATERFALL_CONTAINER)
+@HippyController(name = WaterFallComponentName.CONTAINER)
 public class HippyQBWaterfallViewController extends HippyViewController<HippyQBWaterfallView> {
 
-  static final String TAG = WaterFallComponentName.WATERFALL_CONTAINER;
+  static final String TAG = WaterFallComponentName.CONTAINER;
 
   @Override
   protected void addView(ViewGroup parentView, View view, int index) {
@@ -73,10 +73,24 @@ public class HippyQBWaterfallViewController extends HippyViewController<HippyQBW
       .setContainBannerView(containBannerView);
   }
 
-  @HippyControllerProps(name = "itemGap", defaultType = HippyControllerProps.NUMBER, defaultNumber = 0)
+  @HippyControllerProps(name = WaterFallComponentName.PROPERTY_CONTENT_INSET, defaultType = HippyControllerProps.NUMBER, defaultNumber = 0)
+  public void setContentInset(HippyQBWaterfallView listview, HippyMap data) {
+    int left = dpToPx(data.getInt("left"));
+    int top = dpToPx(data.getInt("top"));
+    int right = dpToPx(data.getInt("right"));
+    int bottom = dpToPx(data.getInt("bottom"));
+
+    listview.setPadding(left, top, right, bottom);
+  }
+
+  protected int dpToPx(int dp) {
+    return (int) PixelUtil.dp2px(dp);
+  }
+
+  @HippyControllerProps(name = WaterFallComponentName.PROPERTY_SPACING, defaultType = HippyControllerProps.NUMBER, defaultNumber = 0)
   public void setItemGap(HippyQBWaterfallView listview, int itemGap) {
     ((HippyQBWaterfallLayoutManager) listview.getLayoutManager())
-      .setItemGap((int) PixelUtil.dp2px(itemGap));
+      .setItemGap(dpToPx(itemGap));
   }
 
   @HippyControllerProps(name = "paddingStartZero", defaultType = HippyControllerProps.BOOLEAN, defaultBoolean = true)
@@ -91,7 +105,7 @@ public class HippyQBWaterfallViewController extends HippyViewController<HippyQBW
       .setBannerViewMatch(bannerViewMatch);
   }
 
-  @HippyControllerProps(name = "numberOfColumns", defaultType = HippyControllerProps.NUMBER, defaultNumber = 2)
+  @HippyControllerProps(name = WaterFallComponentName.PROPERTY_COLUMNS, defaultType = HippyControllerProps.NUMBER, defaultNumber = 2)
   public void setNumberOfColumns(HippyQBWaterfallView listview, int number) {
     ((HippyQBWaterfallLayoutManager) listview.getLayoutManager()).setColumns(number);
   }
