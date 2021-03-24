@@ -52,18 +52,17 @@ public class HippyPullFooterViewController extends HippyViewController<HippyPull
   }
 
   @Override
-  public void dispatchFunction(HippyPullFooterView view, String functionName, HippyArray dataArray)
-  {
+  public void dispatchFunction(HippyPullFooterView view, String functionName, HippyArray dataArray) {
     super.dispatchFunction(view, functionName, dataArray);
     View parent = view.getParentView();
-    if (parent != null && parent instanceof HippyListView) {
-      switch (functionName)
-      {
-        case "collapsePullFooter":
-        {
-          ((HippyListView)parent).onFooterRefreshFinish();
-          break;
+    switch (functionName) {
+      case "collapsePullFooter": {
+        if (parent instanceof HippyListView) {
+          ((HippyListView) parent).onFooterRefreshFinish();
+        } else if (parent instanceof IFooterContainer) {
+          ((IFooterContainer) parent).onFooterRefreshFinish();
         }
+        break;
       }
     }
   }

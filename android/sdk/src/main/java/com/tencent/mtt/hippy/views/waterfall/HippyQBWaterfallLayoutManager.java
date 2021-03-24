@@ -9,6 +9,12 @@ import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.tencent.mtt.hippy.uimanager.PullFooterRenderNode;
+import com.tencent.mtt.hippy.uimanager.RenderNode;
+import com.tencent.mtt.hippy.utils.HippyViewUtil;
+import com.tencent.mtt.hippy.views.refresh.FooterUtil;
+import com.tencent.mtt.hippy.views.refresh.HippyPullFooterView;
+import com.tencent.mtt.hippy.views.waterfall.HippyQBWaterfallView.HippyWaterfallAdapter;
 import com.tencent.mtt.supportui.views.recyclerview.BaseLayoutManager;
 import com.tencent.mtt.supportui.views.recyclerview.RecyclerAdapter;
 import com.tencent.mtt.supportui.views.recyclerview.RecyclerView;
@@ -16,6 +22,7 @@ import com.tencent.mtt.supportui.views.recyclerview.RecyclerViewBase;
 import com.tencent.mtt.supportui.views.recyclerview.RecyclerViewItem;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.tencent.mtt.supportui.views.recyclerview.RecyclerViewBase.LAYOUT_TYPE_WATERFALL;
@@ -31,7 +38,7 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
 
   static final int MIN_COLUMN = 2;
   int mColumns = MIN_COLUMN;
-  int mItemGap = 20;
+  int mItemGap = 0;
   boolean mPaddingStartZero = true;
   boolean mBannerViewMatch = false;
   boolean mHasContainBannerView = false;
@@ -97,7 +104,7 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
     SparseArray<List<Integer>> items = new SparseArray<>();
     int n = 0;
 
-    RecyclerAdapter adapter = (RecyclerAdapter) mRecyclerView.getAdapter();
+    HippyWaterfallAdapter adapter = (HippyWaterfallAdapter) mRecyclerView.getAdapter();
 
     if (mHasContainBannerView) {
       position += 1;
@@ -128,7 +135,16 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
       int myHeight = adapter.getItemHeight(n) + adapter
         .getItemMaigin(RecyclerAdapter.LOCATION_TOP, n)
         + adapter.getItemMaigin(RecyclerAdapter.LOCATION_BOTTOM, n);
-      columnHeights[targetColumnIndex] += myHeight;
+
+      // todo learn：【重要逻辑】计算每一列view总高度（此处特殊处理了含footer的情况）
+      RenderNode node = adapter.getItemNode(i);
+      if (node instanceof PullFooterRenderNode) {
+        int height = getHightestColumnHeight(columnHeights) + myHeight;
+        Arrays.fill(columnHeights, height);
+      } else {
+        columnHeights[targetColumnIndex] += myHeight;
+      }
+
       if (DEBUG) {
         List<Integer> itemLine = items.get(targetColumnIndex);
         if (itemLine == null) {
@@ -158,7 +174,7 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
     int columnHeights[] = new int[mColumns];
     SparseArray<List<Integer>> items = new SparseArray<>();
     int n = 0;
-    RecyclerAdapter adapter = (RecyclerAdapter) mRecyclerView.getAdapter();
+    HippyWaterfallAdapter adapter = (HippyWaterfallAdapter) mRecyclerView.getAdapter();
 
     if (mHasContainBannerView) {
       position += 1;
@@ -185,7 +201,15 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
       int myHeight = adapter.getItemHeight(n) + adapter
         .getItemMaigin(RecyclerAdapter.LOCATION_TOP, n)
         + adapter.getItemMaigin(RecyclerAdapter.LOCATION_BOTTOM, n);
-      columnHeights[targetColumnIndex] += myHeight;
+
+      RenderNode node = adapter.getItemNode(i);
+      if (node instanceof PullFooterRenderNode) {
+        int height = getHightestColumnHeight(columnHeights) + myHeight;
+        Arrays.fill(columnHeights, height);
+      } else {
+        columnHeights[targetColumnIndex] += myHeight;
+      }
+
       if (DEBUG) {
         List<Integer> itemLine = items.get(targetColumnIndex);
         if (itemLine == null) {
@@ -403,6 +427,12 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
         // no more items to layout.
         break;
       }
+
+      // todo learn：【重要逻辑】计算子view应占据的宽度，并给view的layoutParam赋值
+      if (isFooterView(view)) {
+        firstItemWidth = (getWidth() - getPaddingLeft() - getPaddingRight());
+      }
+
       RecyclerViewBase.LayoutParams params = (RecyclerViewBase.LayoutParams) view
         .getLayoutParams();
       if (params instanceof LayoutParams) {
@@ -470,7 +500,10 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
           }
         }
 
-        if (mHasContainBannerView && index == 0) {
+        // todo learn：【重要逻辑】计算瀑布流已用宽度，用于后续布局子view
+        if (isFooterView(view)) {
+          widthUsed = 0;
+        } else if (mHasContainBannerView && index == 0) {
           widthUsed = mRecyclerView.getMeasuredWidth();
         } else {
           widthUsed =
@@ -487,6 +520,7 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
       //                }
       //            }
 
+      // todo learn：【重要逻辑】measure子view，确定宽高（widthUsed为瀑布流中，一行内已经使用了的宽度）
       measureChildWithMargins(view, widthUsed, 0);
       if (mRecyclerView.getAdapter() instanceof RecyclerAdapter
         && ((RecyclerAdapter) mRecyclerView.getAdapter()).isAutoCalculateItemHeight()) {
@@ -520,7 +554,8 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
       int left, top, right, bottom;
       if (getOrientation() == VERTICAL) {
 
-        if (viewType == RecyclerViewBase.ViewHolder.TYPE_FOOTER) {
+        // todo learn：【重要逻辑】计算子view的上下左右位置，用于后续layout
+        if (isFooterView(view) || viewType == RecyclerViewBase.ViewHolder.TYPE_FOOTER) {
           left = getPaddingLeft();
           right = left + mOrientationHelper.getDecoratedMeasurementInOther(view);
           top = mOrientationHelper.getDecoratedEnd(getChildClosestToDefaultFooter());
@@ -570,6 +605,7 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
       // We calculate everything with View's bounding box (which includes
       // decor and margins)
       // To calculate correct layout position, we subtract margins.
+      // todo learn：【重要逻辑】布局子view位置
       layoutDecorated(view, left + params.leftMargin, top + params.topMargin,
         right - params.rightMargin, bottom - params.bottomMargin);
       if (DEBUG) {
@@ -723,14 +759,19 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
         if (child instanceof RecyclerViewItem) {
           if (((RecyclerViewItem) child).getChildCount() > 0) {
             View contentView = ((RecyclerViewItem) child).getChildAt(0);
-            measureWH.width = contentView.getMeasuredWidth()
-              + child.getPaddingRight() + child
-              .getPaddingLeft();//mItemGap * (mColumns - 1) / mColumns;
-            measureWH.height = contentView.getMeasuredHeight()
-              + mItemGap;// + ((RecyclerAdapter) mRecyclerView.getAdapter()).getDividerHeight(0)
+            // todo learn：【重要逻辑】计算子view宽高，后续生成measureSpec用
+            if (isFooterView(contentView)) {
+              setFooterMeasureWH(contentView, measureWH);
+            } else {
+              measureWH.width = contentView.getMeasuredWidth()
+                + child.getPaddingRight() + child
+                .getPaddingLeft();//mItemGap * (mColumns - 1) / mColumns;
+              measureWH.height = contentView.getMeasuredHeight()
+                + mItemGap;// + ((RecyclerAdapter) mRecyclerView.getAdapter()).getDividerHeight(0)
+            }
           }
-//                } else if (child instanceof HippyFooterView) {
-//                    setFooterMeasureWH((HippyFooterView)child, measureWH);
+        } else if (child instanceof HippyPullFooterView) {
+          setFooterMeasureWH(child, measureWH);
         } else if (child instanceof ViewGroup) {
           ViewGroup viewGroup = (ViewGroup) child;
           if (viewGroup.getChildCount() > 0) {
@@ -758,15 +799,16 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
     int height;
   }
 
-//    void setFooterMeasureWH(HippyFooterView footerView, MeasureWH measureWH) {
-//        if (footerView.getLayoutParams() == null) {
-//            measureWH.width = 0;
-//            measureWH.height = 0;
-//        } else {
-//            measureWH.width = footerView.getLayoutParams().width;
-//            measureWH.height = footerView.getLayoutParams().height;
-//        }
-//    }
+  void setFooterMeasureWH(View footerView, MeasureWH measureWH) {
+    RenderNode footerNode = HippyViewUtil.getRenderNode(footerView);
+    if (footerNode != null) {
+      measureWH.width = footerNode.getWidth();
+      measureWH.height = footerNode.getHeight() + mItemGap;
+    } else {
+      measureWH.width = footerView.getWidth();
+      measureWH.height = footerView.getHeight() + mItemGap;
+    }
+  }
 
   //    protected void handleRecordItemHeightChange(int index, int oldItemHeight, int newItemHeight)
   //    {
@@ -956,11 +998,35 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
         targetIndex = i;
         break;
       }
+
+      // todo learn：【重要逻辑】查找距离底部最近的一个view（高度最短的一列中，最后的那个view）
+      // 1. 此处处理滚动到列表底部时，需要以最后一个view为准，否则最后一个view仅能显示一半
+      boolean isLastView = (getPosition(childsClosestToEnd[i]) == getItemCount() - 1);
+      if (isLastView) {
+        targetIndex = i;
+        break;
+      }
+
+      //  2. 此处特殊处理了有footer时的场景，footer应该是最底部的view；
+      //  *本方法选取的view会影响瀑布流 scrollBy 时候的计算
+      boolean isFooter = isFooterView(childsClosestToEnd[targetIndex]);
+      if (isFooter) {
+        targetIndex = i;
+        break;
+      }
       if (childsClosestToEnd[targetIndex].getBottom() > childsClosestToEnd[i].getBottom()) {
         targetIndex = i;
       }
     }
     return childsClosestToEnd[targetIndex];
+  }
+
+  /**
+   * 判断一个节点是否是footer（前端需在列表最后一位添加 PullFooterView）
+   * 应用本方法的位置，都是适配footer所新增的代码（涉及measure、layout等过程）
+   */
+  private boolean isFooterView(View target) {
+    return FooterUtil.isFooterView(target);
   }
 
   /**
