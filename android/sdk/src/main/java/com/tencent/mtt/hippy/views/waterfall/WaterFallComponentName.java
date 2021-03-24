@@ -2,7 +2,11 @@ package com.tencent.mtt.hippy.views.waterfall;
 
 class WaterFallComponentName {
 
-  public static final String WATERFALL_CONTAINER = "WaterfallView";
-  public static final String WATERFALL_ITEM = "WaterfallItem";
+  public static final String CONTAINER = "WaterfallView";
+  public static final String ITEM = "WaterfallItem";
+
+  public static final String PROPERTY_COLUMNS = "numberOfColumns";
+  public static final String PROPERTY_SPACING = "interItemSpacing";
+  public static final String PROPERTY_CONTENT_INSET = "contentInset";
 
 }

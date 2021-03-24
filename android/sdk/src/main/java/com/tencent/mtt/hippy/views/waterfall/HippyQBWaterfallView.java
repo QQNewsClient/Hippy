@@ -16,8 +16,14 @@ import com.tencent.mtt.hippy.uimanager.DiffUtils;
 import com.tencent.mtt.hippy.uimanager.HippyViewBase;
 import com.tencent.mtt.hippy.uimanager.HippyViewEvent;
 import com.tencent.mtt.hippy.uimanager.NativeGestureDispatcher;
+import com.tencent.mtt.hippy.uimanager.PullFooterRenderNode;
+import com.tencent.mtt.hippy.uimanager.PullHeaderRenderNode;
 import com.tencent.mtt.hippy.uimanager.RenderNode;
 import com.tencent.mtt.hippy.utils.PixelUtil;
+import com.tencent.mtt.hippy.views.list.HippyListView;
+import com.tencent.mtt.hippy.views.refresh.FooterUtil;
+import com.tencent.mtt.hippy.views.refresh.HippyPullFooterView;
+import com.tencent.mtt.hippy.views.refresh.IFooterContainer;
 import com.tencent.mtt.supportui.views.recyclerview.ContentHolder;
 import com.tencent.mtt.supportui.views.recyclerview.IRecyclerViewFooter;
 import com.tencent.mtt.supportui.views.recyclerview.RecyclerAdapter;
@@ -28,9 +34,8 @@ import com.tencent.mtt.supportui.views.recyclerview.Scroller;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase
-//        , HippyQBSkinHandler.HippyQBCommonSkin, HippyQBRefreshHeader.RefreshableCallback
-{
+
+public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase, IFooterContainer {
 
   static final String TAG = "HippyQBWaterfallView";
   static final boolean DEBUG = DebugUtil.DEBUG;
@@ -627,6 +632,23 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase
     mAdapter.setPreloadItemNum(count);
   }
 
+  private int mFooterState = HippyListView.REFRESH_STATE_IDLE;
+
+  @Override
+  public int getFooterState() {
+    return mFooterState;
+  }
+
+  @Override
+  public void setFooterState(int state) {
+    mFooterState = state;
+  }
+
+  @Override
+  public void onFooterRefreshFinish() {
+    setFooterState(HippyListView.REFRESH_STATE_LOADING);
+  }
+
 //    @Override
 //    public boolean supportDropdown() {
 //        return mCallback != null && mCallback.supportDropdown();
@@ -732,7 +754,10 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase
       RenderNode contentViewRenderNode = mHippyContext.getRenderManager()
         .getRenderNode(getId()).getChildAt(position);
       contentViewRenderNode.setLazy(false);
+      // todo learn：【重要逻辑】根据前端的 RenderNode 创建真实的view
       contentHolder.mContentView = contentViewRenderNode.createViewRecursive();
+      FooterUtil.checkFooterBinding(mParentRecyclerView, contentHolder.mContentView);
+
       contentHolder.mBindNode = contentViewRenderNode;
       contentHolder.isCreated = true;
       if (DEBUG) {
@@ -902,6 +927,10 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase
 
       }
 
+      if (contentHolder.mContentView instanceof HippyPullFooterView) {
+        FooterUtil.sendFooterReleasedEvent((HippyPullFooterView) contentHolder.mContentView);
+      }
+
       if (contentHolder.mBindNode instanceof HippyQBWaterfallItemRenderNode) {
         ((HippyQBWaterfallItemRenderNode) contentHolder.mBindNode)
           .setRecycleItemTypeChangeListener(this);
@@ -930,6 +959,14 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase
         HippyMap props = itemNode.getProps();
         if (props != null && props.containsKey("type")) {
           return props.getInt("type");
+        }
+
+        // todo learn：【重要逻辑】影响header和footer复用，如果不加会复用到普通cell导致样式错乱
+        if (itemNode instanceof PullFooterRenderNode) {
+          return RecyclerViewBase.ViewHolder.TYPE_CUSTOM_FOOTER;
+        }
+        if (itemNode instanceof PullHeaderRenderNode) {
+          return RecyclerViewBase.ViewHolder.TYPE_CUSTOM_HEADERE;
         }
       }
 
@@ -1164,10 +1201,10 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase
       int lastVisiblePos = ((HippyQBWaterfallLayoutManager) mParentRecyclerView
         .getLayoutManager()).findLastVisibleItemPosition();
       // harryguo: 如果最后一个可见View是footer，那就要减掉这个footer
-//            if (lastVisiblePos >= 1 && mParentRecyclerView.getLayoutManager()
-//                    .findViewByPosition(lastVisiblePos) instanceof HippyFooterView) {
-//                lastVisiblePos = lastVisiblePos - 1;
-//            }
+      if (lastVisiblePos >= 1 && mParentRecyclerView.getLayoutManager()
+        .findViewByPosition(lastVisiblePos) instanceof HippyPullFooterView) {
+        lastVisiblePos = lastVisiblePos - 1;
+      }
 
       if (mParentRecyclerView.mViewFlinger.getScroller() == null) {
         return;
@@ -1285,10 +1322,10 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase
       int lastVisiblePos = ((HippyQBWaterfallLayoutManager) mParentRecyclerView
         .getLayoutManager()).findLastVisibleItemPosition();
       // harryguo: 如果最后一个可见View是footer，那就要减掉这个footer
-//            if (lastVisiblePos >= 1 && mParentRecyclerView.getLayoutManager()
-//                    .findViewByPosition(lastVisiblePos) instanceof HippyFooterView) {
-//                lastVisiblePos = lastVisiblePos - 1;
-//            }
+      if (lastVisiblePos >= 1 && mParentRecyclerView.getLayoutManager()
+        .findViewByPosition(lastVisiblePos) instanceof HippyPullFooterView) {
+        lastVisiblePos = lastVisiblePos - 1;
+      }
       // 传入包含item frames的数组
       HippyArray visibleItemArray = new HippyArray();
 //            int baseHeight = 0;
