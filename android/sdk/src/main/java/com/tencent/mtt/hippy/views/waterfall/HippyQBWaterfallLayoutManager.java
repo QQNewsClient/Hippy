@@ -39,6 +39,7 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
   static final int MIN_COLUMN = 2;
   int mColumns = MIN_COLUMN;
   int mItemGap = 0;
+  int mColumnSpacing = 0;
   boolean mPaddingStartZero = true;
   boolean mBannerViewMatch = false;
   boolean mHasContainBannerView = false;
@@ -79,6 +80,14 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
 
   public void setItemGap(int gap) {
     mItemGap = Math.max(0, gap);
+  }
+
+  public void setColumnSpacing(int spacing) {
+    mColumnSpacing = Math.max(0, spacing);
+  }
+
+  public int getColumnSpacing() {
+    return mColumnSpacing;
   }
 
   public void setPaddingStartZero(boolean paddingStartZero) {
@@ -394,7 +403,7 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
     compensateLayoutStart((WaterFallRenderState) renderState);
 
     final int itemWidth = (getWidth() - getPaddingLeft() - getPaddingRight()) / mColumns;
-    final int itemGapH = mItemGap * (mColumns - 1) / mColumns; // todo
+    final int itemGapH = getColumnSpacing() * (mColumns - 1) / mColumns;
 
     // max offset we should set is mFastScroll + available
     final int start = renderState.mAvailable;
