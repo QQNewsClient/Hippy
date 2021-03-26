@@ -1,5 +1,6 @@
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
+apply from: 'packAarSourceAndDoc.gradle'
 
 Properties properties = new Properties()
 InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream()
@@ -28,6 +29,8 @@ bintray {
 publishing {
     publications {
         HippyPublication(MavenPublication) {
+            artifact androidSourcesJar
+            artifact androidJavadocsJar
             artifact("$buildDir/outputs/aar/android-sdk-release.aar")
             groupId project.BINTRAY_GROUP_ID
             artifactId project.BINTRAY_ARTIFACT_ID
