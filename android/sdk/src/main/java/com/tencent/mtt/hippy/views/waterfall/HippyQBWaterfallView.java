@@ -1560,7 +1560,7 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
 
     @Override
     public int getPreloadThresholdInItemNumber() {
-      return mPreloadItemNum;
+      return Math.max(1, mPreloadItemNum); // 为0时无法触发底部的 onEndReached 事件
     }
 
     @Override

@@ -87,10 +87,16 @@ public class HippyQBWaterfallViewController extends HippyViewController<HippyQBW
     return (int) PixelUtil.dp2px(dp);
   }
 
-  @HippyControllerProps(name = WaterFallComponentName.PROPERTY_SPACING, defaultType = HippyControllerProps.NUMBER, defaultNumber = 0)
-  public void setItemGap(HippyQBWaterfallView listview, int itemGap) {
+  @HippyControllerProps(name = WaterFallComponentName.PROPERTY_ITEM_SPACING, defaultType = HippyControllerProps.NUMBER, defaultNumber = 0)
+  public void setItemSpacing(HippyQBWaterfallView listview, int spacing) {
     ((HippyQBWaterfallLayoutManager) listview.getLayoutManager())
-      .setItemGap(dpToPx(itemGap));
+      .setItemGap(dpToPx(spacing));
+  }
+
+  @HippyControllerProps(name = WaterFallComponentName.PROPERTY_COLUMN_SPACING, defaultType = HippyControllerProps.NUMBER, defaultNumber = 0)
+  public void setColumnSpacing(HippyQBWaterfallView listview, int spacing) {
+    ((HippyQBWaterfallLayoutManager) listview.getLayoutManager())
+      .setColumnSpacing(dpToPx(spacing));
   }
 
   @HippyControllerProps(name = "paddingStartZero", defaultType = HippyControllerProps.BOOLEAN, defaultBoolean = true)
