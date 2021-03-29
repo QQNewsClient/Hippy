@@ -141,6 +141,7 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
     if (getAdapter() == null) {
       setAdapter(mAdapter);
     }
+    setFooterState(HippyListView.REFRESH_STATE_IDLE); // 每次刷新数据后重置footer状态
 
     mAdapter.notifyDataSetChanged();
 
@@ -1560,7 +1561,7 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
 
     @Override
     public int getPreloadThresholdInItemNumber() {
-      return Math.max(1, mPreloadItemNum); // 为0时无法触发底部的 onEndReached 事件
+      return mPreloadItemNum;
     }
 
     @Override

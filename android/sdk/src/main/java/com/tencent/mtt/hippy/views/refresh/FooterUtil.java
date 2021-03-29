@@ -7,6 +7,7 @@ import com.tencent.mtt.hippy.uimanager.PullFooterRenderNode;
 import com.tencent.mtt.hippy.uimanager.RenderNode;
 import com.tencent.mtt.hippy.utils.HippyViewUtil;
 import com.tencent.mtt.hippy.views.list.HippyListView;
+import com.tencent.mtt.hippy.views.waterfall.HippyQBWaterfallView;
 import com.tencent.mtt.supportui.views.recyclerview.RecyclerViewBase;
 
 public class FooterUtil {
@@ -29,6 +30,10 @@ public class FooterUtil {
         footerContainer.setFooterState(HippyListView.REFRESH_STATE_LOADING);
       }
       new HippyViewEvent(HippyListView.EVENT_TYPE_FOOTER_RELEASED).send(footerView, null);
+    }
+
+    if (footerContainer instanceof HippyQBWaterfallView) {
+      ((HippyQBWaterfallView) footerContainer).startLoadMore();
     }
   }
 
