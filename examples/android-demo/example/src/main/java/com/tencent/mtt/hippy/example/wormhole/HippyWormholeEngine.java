@@ -84,7 +84,7 @@ public class HippyWormholeEngine
 			mHippyEngine = HippyEngine.create(initParams);
 			// 异步初始化Hippy引擎
 			mHippyEngine.initEngine(new HippyEngine.EngineListener() {
-				// Hippy引擎初始化完成
+        // Hippy引擎初始化完成
 				/**
 				 * @param  statusCode
 				 *         status code from initializing procedure
@@ -92,8 +92,8 @@ public class HippyWormholeEngine
 				 *         Message from initializing procedure
 				 */
 				@Override
-				public void onInitialized(int statusCode, String msg) {
-					if (statusCode != 0)
+				public void onInitialized(HippyEngine.EngineInitStatus statusCode, String msg) {
+					if (statusCode != HippyEngine.EngineInitStatus.STATUS_OK)
 						LogUtils.e("MyActivity", "hippy engine init failed code:" + statusCode + ", msg=" + msg);
 					// else
 					{
@@ -125,17 +125,18 @@ public class HippyWormholeEngine
 						loadParams.jsParams.pushString("msgFromNative", "Hi js developer, I come from native code!");
 						// 加载Hippy前端模块
 						mHippyRootView = mHippyEngine.loadModule(loadParams, new HippyEngine.ModuleListener() {
-							public void onInitialized(int statusCode, String msg, HippyRootView hippyRootView) {
-								if (statusCode == HippyEngine.STATUS_OK) {
-									HippyWormholeManager.getInstance().setServerEngine(mHippyEngine, hippyRootView);
-									runnable.run();
-									Log.d("april", "wormhole engine success");
-								} else {
-									LogUtils.e(WORMHOLE_TAG, "Hippy: init worm engine failed statusCode:" + statusCode + ",msg:" + msg);
-								}
-							}
+              @Override
+              public void onLoadCompleted(HippyEngine.ModuleLoadStatus statusCode, String msg, HippyRootView hippyRootView) {
+                if (statusCode == HippyEngine.ModuleLoadStatus.STATUS_OK) {
+                  HippyWormholeManager.getInstance().setServerEngine(mHippyEngine, hippyRootView);
+                  runnable.run();
+                  Log.d("april", "wormhole engine success");
+                } else {
+                  LogUtils.e(WORMHOLE_TAG, "Hippy: init worm engine failed statusCode:" + statusCode + ",msg:" + msg);
+                }
+              }
 
-							public boolean onJsException(HippyJsException exception) {
+              public boolean onJsException(HippyJsException exception) {
 								LogUtils.e(WORMHOLE_TAG, "Hippy: loadModule onJsException:" + exception);
 								return true;
 							}
