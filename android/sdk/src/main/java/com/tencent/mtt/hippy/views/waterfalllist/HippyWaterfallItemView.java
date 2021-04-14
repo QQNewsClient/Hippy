@@ -1,16 +1,16 @@
-package com.tencent.mtt.hippy.views.waterfall;
+package com.tencent.mtt.hippy.views.waterfalllist;
 
 import android.content.Context;
 import android.util.Log;
 
 import com.tencent.mtt.hippy.views.view.HippyViewGroup;
 
-public class HippyQBWaterfallItemView extends HippyViewGroup {
+public class HippyWaterfallItemView extends HippyViewGroup {
 
   static final String TAG = "HippyWaterfallItemView";
   private int mType;
 
-  public HippyQBWaterfallItemView(Context context) {
+  public HippyWaterfallItemView(Context context) {
     super(context);
     //setBackgroundColor(Color.BLACK);
   }

@@ -1,4 +1,4 @@
-package com.tencent.mtt.hippy.views.waterfall;
+package com.tencent.mtt.hippy.views.waterfalllist;
 
 import android.text.Layout;
 import android.view.View;
@@ -61,7 +61,7 @@ public class DebugUtil {
     if (HippyTextViewController.CLASS_NAME.equals(node.getClassName())) {
       handleStringifyWhenClassNameIsHippyTextView(node, sb);
     } else if (WaterFallComponentName.ITEM.equals(node.getClassName())) {
-      int type = ((HippyQBWaterfallItemRenderNode) node).getType();
+      int type = ((HippyWaterfallItemRenderNode) node).getType();
       sb.append("<type=").append(type).append(">");
     } else if (HippyImageViewController.CLASS_NAME.equals(node.getClassName())) {
       HippyMap props = node.getProps();
@@ -121,8 +121,8 @@ public class DebugUtil {
       .append("@")
       .append(Integer.toHexString(view.hashCode()));
 
-    if (view instanceof HippyQBWaterfallItemView) {
-      sb.append("<").append(((HippyQBWaterfallItemView) view).getType()).append(">");
+    if (view instanceof HippyWaterfallItemView) {
+      sb.append("<").append(((HippyWaterfallItemView) view).getType()).append(">");
     } else if (view instanceof HippyTextView) {
       if (DEBUG) {
         if (fieldTextViewLayout == null) {

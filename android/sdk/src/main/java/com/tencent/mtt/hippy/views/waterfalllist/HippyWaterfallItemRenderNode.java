@@ -1,4 +1,4 @@
-package com.tencent.mtt.hippy.views.waterfall;
+package com.tencent.mtt.hippy.views.waterfalllist;
 
 import android.util.Log;
 
@@ -7,12 +7,12 @@ import com.tencent.mtt.hippy.common.HippyMap;
 import com.tencent.mtt.hippy.uimanager.ControllerManager;
 import com.tencent.mtt.hippy.uimanager.RenderNode;
 
-public class HippyQBWaterfallItemRenderNode extends RenderNode {
+public class HippyWaterfallItemRenderNode extends RenderNode {
 
   static final String TAG = "HippyWaterfallItemNode";
   IRecycleItemTypeChange mRecycleItemTypeChangeListener;
 
-  public HippyQBWaterfallItemRenderNode(int mId, HippyMap mPropsToUpdate, String className,
+  public HippyWaterfallItemRenderNode(int mId, HippyMap mPropsToUpdate, String className,
     HippyRootView mRootView,
     ControllerManager componentManager, boolean isLazyLoad) {
     super(mId, mPropsToUpdate, className, mRootView, componentManager, isLazyLoad);
@@ -59,7 +59,7 @@ public class HippyQBWaterfallItemRenderNode extends RenderNode {
   public interface IRecycleItemTypeChange {
 
     void onRecycleItemTypeChanged(int oldType, int newType,
-      HippyQBWaterfallItemRenderNode listItemNode);
+      HippyWaterfallItemRenderNode listItemNode);
   }
 
 }

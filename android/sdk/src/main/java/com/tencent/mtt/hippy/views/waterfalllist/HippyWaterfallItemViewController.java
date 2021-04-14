@@ -1,4 +1,4 @@
-package com.tencent.mtt.hippy.views.waterfall;
+package com.tencent.mtt.hippy.views.waterfalllist;
 
 import android.content.Context;
 import android.util.Log;
@@ -15,18 +15,18 @@ import com.tencent.mtt.hippy.uimanager.HippyViewController;
 import com.tencent.mtt.hippy.uimanager.RenderNode;
 
 @HippyController(name = WaterFallComponentName.ITEM, isLazyLoad = true)
-public class HippyQBWaterfallItemViewController extends
-  HippyViewController<HippyQBWaterfallItemView> {
+public class HippyWaterfallItemViewController extends
+  HippyViewController<HippyWaterfallItemView> {
 
   static final String TAG = WaterFallComponentName.ITEM;
 
   @Override
   protected View createViewImpl(Context context) {
-    return new HippyQBWaterfallItemView(context);
+    return new HippyWaterfallItemView(context);
   }
 
   @HippyControllerProps(name = "type", defaultType = HippyControllerProps.NUMBER, defaultNumber = 0)
-  public void setListItemType(HippyQBWaterfallItemView listItemView, int type) {
+  public void setListItemType(HippyWaterfallItemView listItemView, int type) {
     listItemView.setType(type);
   }
 
@@ -34,7 +34,7 @@ public class HippyQBWaterfallItemViewController extends
   public RenderNode createRenderNode(int id, HippyMap props, String className,
     HippyRootView hippyRootView, ControllerManager controllerManager,
     boolean lazy) {
-    return new HippyQBWaterfallItemRenderNode(id, props, className, hippyRootView,
+    return new HippyWaterfallItemRenderNode(id, props, className, hippyRootView,
       controllerManager, lazy);
   }
 
