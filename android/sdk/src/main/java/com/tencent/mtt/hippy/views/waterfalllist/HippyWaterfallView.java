@@ -1,4 +1,4 @@
-package com.tencent.mtt.hippy.views.waterfall;
+package com.tencent.mtt.hippy.views.waterfalllist;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase, IFooterContainer {
+public class HippyWaterfallView extends RecyclerView implements HippyViewBase, IFooterContainer {
 
   static final String TAG = "HippyQBWaterfallView";
   static final boolean DEBUG = DebugUtil.DEBUG;
@@ -67,10 +67,10 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
   // 这里的代码仅用于自动化测试 <<<
 
   //    private IQBRefreshDropdown mCallback;
-  public HippyQBWaterfallView(Context context) {
+  public HippyWaterfallView(Context context) {
     super(context);
     mHippyContext = ((HippyInstanceContext) context).getEngineContext();
-    this.setLayoutManager(new HippyQBWaterfallLayoutManager(context));
+    this.setLayoutManager(new HippyWaterfallLayoutManager(context));
     //mContext = context;
     mAdapter = new HippyWaterfallAdapter(this);
     //        postDelayed(new Runnable()
@@ -477,14 +477,14 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
           @Override
           public boolean onPreDraw() {
             if (mAdapter.getItemCount() > 0
-              && HippyQBWaterfallView.this.getChildCount() > 0) {
+              && HippyWaterfallView.this.getChildCount() > 0) {
               mViewTreeObserver.removeOnPreDrawListener(this);
               mHasRemovePreDraw = true;
               post(new Runnable() {
                 @Override
                 public void run() {
                   getOnInitialListReadyEvent()
-                    .send(HippyQBWaterfallView.this, null);
+                    .send(HippyWaterfallView.this, null);
                 }
               });
 
@@ -681,7 +681,7 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
    */
 
   public class HippyWaterfallAdapter extends RecyclerAdapter implements
-    HippyQBWaterfallItemRenderNode.IRecycleItemTypeChange {
+    HippyWaterfallItemRenderNode.IRecycleItemTypeChange {
 
     private HippyQBWaterfallEvent mOnEndReachedEvent;
     private HippyQBWaterfallEvent mOnFooterAppearedEvent;
@@ -822,8 +822,8 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
       }
 
       if (nodeHolder.mBindNode != null
-        && nodeHolder.mBindNode instanceof HippyQBWaterfallItemRenderNode) {
-        ((HippyQBWaterfallItemRenderNode) nodeHolder.mBindNode)
+        && nodeHolder.mBindNode instanceof HippyWaterfallItemRenderNode) {
+        ((HippyWaterfallItemRenderNode) nodeHolder.mBindNode)
           .setRecycleItemTypeChangeListener(null);
       }
 
@@ -932,8 +932,8 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
         FooterUtil.sendFooterReleasedEvent((HippyPullFooterView) contentHolder.mContentView);
       }
 
-      if (contentHolder.mBindNode instanceof HippyQBWaterfallItemRenderNode) {
-        ((HippyQBWaterfallItemRenderNode) contentHolder.mBindNode)
+      if (contentHolder.mBindNode instanceof HippyWaterfallItemRenderNode) {
+        ((HippyWaterfallItemRenderNode) contentHolder.mBindNode)
           .setRecycleItemTypeChangeListener(this);
       }
     }
@@ -997,18 +997,18 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
           itemHeight = listItemNode.getHeight();
         }
       }
-      return itemHeight + ((HippyQBWaterfallLayoutManager) mParentRecyclerView
+      return itemHeight + ((HippyWaterfallLayoutManager) mParentRecyclerView
         .getLayoutManager()).getItemGap();
     }
 
     @Override
     public int getHeightBefore(int pos) {
-      return ((HippyQBWaterfallLayoutManager) getLayoutManager()).getHeightBefore(pos);
+      return ((HippyWaterfallLayoutManager) getLayoutManager()).getHeightBefore(pos);
     }
 
     @Override
     public int getTotalHeight() {
-      return ((HippyQBWaterfallLayoutManager) getLayoutManager()).getTotalHeight();
+      return ((HippyWaterfallLayoutManager) getLayoutManager()).getTotalHeight();
     }
 
 //        void preCalculateItemHeights()
@@ -1197,9 +1197,9 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
       int startEdgePos = (int) PixelUtil.px2dp(mParentRecyclerView.mOffsetY);
       int endEdgePos = (int) PixelUtil
         .px2dp(mParentRecyclerView.getHeight() + mParentRecyclerView.mOffsetY);
-      int firstVisiblePos = ((HippyQBWaterfallLayoutManager) mParentRecyclerView
+      int firstVisiblePos = ((HippyWaterfallLayoutManager) mParentRecyclerView
         .getLayoutManager()).findFirstVisibleItemPosition();
-      int lastVisiblePos = ((HippyQBWaterfallLayoutManager) mParentRecyclerView
+      int lastVisiblePos = ((HippyWaterfallLayoutManager) mParentRecyclerView
         .getLayoutManager()).findLastVisibleItemPosition();
       // harryguo: 如果最后一个可见View是footer，那就要减掉这个footer
       if (lastVisiblePos >= 1 && mParentRecyclerView.getLayoutManager()
@@ -1318,9 +1318,9 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
       int startEdgePos = (int) PixelUtil.px2dp(mParentRecyclerView.mOffsetY);
       int endEdgePos = (int) PixelUtil
         .px2dp(mParentRecyclerView.getHeight() + mParentRecyclerView.mOffsetY);
-      int firstVisiblePos = ((HippyQBWaterfallLayoutManager) mParentRecyclerView
+      int firstVisiblePos = ((HippyWaterfallLayoutManager) mParentRecyclerView
         .getLayoutManager()).findFirstVisibleItemPosition();
-      int lastVisiblePos = ((HippyQBWaterfallLayoutManager) mParentRecyclerView
+      int lastVisiblePos = ((HippyWaterfallLayoutManager) mParentRecyclerView
         .getLayoutManager()).findLastVisibleItemPosition();
       // harryguo: 如果最后一个可见View是footer，那就要减掉这个footer
       if (lastVisiblePos >= 1 && mParentRecyclerView.getLayoutManager()
@@ -1477,7 +1477,7 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
     }
 
     private void checkHolderType(int oldType, int newType,
-      HippyQBWaterfallItemRenderNode listItemRenderNode) {
+      HippyWaterfallItemRenderNode listItemRenderNode) {
       //do checkHolderType onScreen
       if (doCheckHolderTypeOnScreen(oldType, newType, listItemRenderNode)) {
         return;
@@ -1518,7 +1518,7 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
     }
 
     private boolean doCheckHolderTypeOnScreen(int oldType, int newType,
-      HippyQBWaterfallItemRenderNode listItemRenderNode) {
+      HippyWaterfallItemRenderNode listItemRenderNode) {
       int count = mParentRecyclerView.getChildCount();
       for (int i = 0; i < count; i++) {
         final ViewHolder holder = mParentRecyclerView
@@ -1536,7 +1536,7 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
     }
 
     private void doHeadToTheSharedPool(int oldType, int newType,
-      HippyQBWaterfallItemRenderNode listItemRenderNode) {
+      HippyWaterfallItemRenderNode listItemRenderNode) {
       if (mRecycler.getRecycledViewPool() != null) {
         final ArrayList<ViewHolder> scrapHeap = mRecycler
           .getRecycledViewPool().mScrap.get(oldType);
@@ -1610,7 +1610,7 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
 
     @Override
     public void onRecycleItemTypeChanged(int oldType, int newType,
-      HippyQBWaterfallItemRenderNode listItemNode) {
+      HippyWaterfallItemRenderNode listItemNode) {
       checkHolderType(oldType, newType, listItemNode);
     }
 
@@ -1662,8 +1662,8 @@ public class HippyQBWaterfallView extends RecyclerView implements HippyViewBase,
 
           @Override
           public void onScroll(int i, int i1) {
-            if (mParentRecyclerView instanceof HippyQBWaterfallView
-              && ((HippyQBWaterfallView) mParentRecyclerView)
+            if (mParentRecyclerView instanceof HippyWaterfallView
+              && ((HippyWaterfallView) mParentRecyclerView)
               .enableOnSrollReport()) {
               checkScrollForReport();
             }

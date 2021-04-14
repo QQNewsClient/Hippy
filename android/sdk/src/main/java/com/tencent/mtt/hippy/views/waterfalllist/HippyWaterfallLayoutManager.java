@@ -1,4 +1,4 @@
-package com.tencent.mtt.hippy.views.waterfall;
+package com.tencent.mtt.hippy.views.waterfalllist;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -14,7 +14,7 @@ import com.tencent.mtt.hippy.uimanager.RenderNode;
 import com.tencent.mtt.hippy.utils.HippyViewUtil;
 import com.tencent.mtt.hippy.views.refresh.FooterUtil;
 import com.tencent.mtt.hippy.views.refresh.HippyPullFooterView;
-import com.tencent.mtt.hippy.views.waterfall.HippyQBWaterfallView.HippyWaterfallAdapter;
+import com.tencent.mtt.hippy.views.waterfalllist.HippyWaterfallView.HippyWaterfallAdapter;
 import com.tencent.mtt.supportui.views.recyclerview.BaseLayoutManager;
 import com.tencent.mtt.supportui.views.recyclerview.RecyclerAdapter;
 import com.tencent.mtt.supportui.views.recyclerview.RecyclerView;
@@ -28,10 +28,10 @@ import java.util.List;
 import static com.tencent.mtt.supportui.views.recyclerview.RecyclerViewBase.LAYOUT_TYPE_WATERFALL;
 
 /**
- * A {@link HippyQBWaterfallLayoutManager} implementation which provides similar functionality to
+ * A {@link HippyWaterfallLayoutManager} implementation which provides similar functionality to
  * {@link android.widget.ListView}.
  */
-public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
+public class HippyWaterfallLayoutManager extends BaseLayoutManager {
 
   private static final String TAG = "HippyQBWaterfallLayout";
   static final boolean DEBUG = DebugUtil.DEBUG;
@@ -45,7 +45,7 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
   boolean mHasContainBannerView = false;
   ArrayList<Integer> mHeaderHeight = new ArrayList<Integer>();
 
-  public HippyQBWaterfallLayoutManager(Context context) {
+  public HippyWaterfallLayoutManager(Context context) {
     this(context, VERTICAL, false);
   }
 
@@ -54,7 +54,7 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
    * @param orientation Layout orientation. Should be {@link #HORIZONTAL} or {@link #VERTICAL}.
    * @param reverseLayout When set to true, renders the layout from end to start.
    */
-  public HippyQBWaterfallLayoutManager(Context context, int orientation, boolean reverseLayout) {
+  public HippyWaterfallLayoutManager(Context context, int orientation, boolean reverseLayout) {
     super(context, orientation, false);
   }
 
@@ -381,7 +381,7 @@ public class HippyQBWaterfallLayoutManager extends BaseLayoutManager {
 
   /**
    * The magic functions :). Fills the given layout, defined by the renderState. This is fairly
-   * independent from the rest of the {@link HippyQBWaterfallLayoutManager} and with little
+   * independent from the rest of the {@link HippyWaterfallLayoutManager} and with little
    * change, can be made publicly available as a helper class.
    *
    * @param recycler Current recycler that is attached to RecyclerView

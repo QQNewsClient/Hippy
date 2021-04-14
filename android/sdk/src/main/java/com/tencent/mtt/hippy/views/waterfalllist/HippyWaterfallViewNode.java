@@ -1,4 +1,4 @@
-package com.tencent.mtt.hippy.views.waterfall;
+package com.tencent.mtt.hippy.views.waterfalllist;
 
 import android.util.Log;
 
@@ -11,11 +11,11 @@ import com.tencent.mtt.hippy.uimanager.RenderNode;
  * Created by phantomqi on 2018/1/8.
  */
 
-public class HippyQBWaterfallViewNode extends RenderNode {
+public class HippyWaterfallViewNode extends RenderNode {
 
   static final String TAG = "QBWaterfallViewNode";
 
-  public HippyQBWaterfallViewNode(int mId, HippyMap mPropsToUpdate, String className,
+  public HippyWaterfallViewNode(int mId, HippyMap mPropsToUpdate, String className,
     HippyRootView mRootView, ControllerManager componentManager,
     boolean isLazyLoad) {
     super(mId, mPropsToUpdate, className, mRootView, componentManager, isLazyLoad);
@@ -32,8 +32,8 @@ public class HippyQBWaterfallViewNode extends RenderNode {
       Log.d(TAG, "removeChild child=" + DebugUtil.stringifyS(uiNode) + " @" + DebugUtil
         .stackTrace(0));
     }
-    if (uiNode instanceof HippyQBWaterfallItemRenderNode) {
-      HippyQBWaterfallItemRenderNode listItemRenderNode = (HippyQBWaterfallItemRenderNode) uiNode;
+    if (uiNode instanceof HippyWaterfallItemRenderNode) {
+      HippyWaterfallItemRenderNode listItemRenderNode = (HippyWaterfallItemRenderNode) uiNode;
       listItemRenderNode.setRecycleItemTypeChangeListener(null);
     }
     return super.removeChild(uiNode);

@@ -1,4 +1,4 @@
-package com.tencent.mtt.hippy.views.waterfall;
+package com.tencent.mtt.hippy.views.waterfalllist;
 
 import android.content.Context;
 import android.util.Log;
@@ -20,7 +20,7 @@ import com.tencent.mtt.supportui.views.recyclerview.IRecyclerViewFooter;
  * Created by leonardgong on 2017/12/7 0007.
  */
 @HippyController(name = WaterFallComponentName.CONTAINER)
-public class HippyQBWaterfallViewController extends HippyViewController<HippyQBWaterfallView> {
+public class HippyWaterfallViewController extends HippyViewController<HippyWaterfallView> {
 
   static final String TAG = WaterFallComponentName.CONTAINER;
 
@@ -30,32 +30,32 @@ public class HippyQBWaterfallViewController extends HippyViewController<HippyQBW
   }
 
   @Override
-  public int getChildCount(HippyQBWaterfallView viewGroup) {
-    return ((HippyQBWaterfallView.HippyWaterfallAdapter) viewGroup.getAdapter())
+  public int getChildCount(HippyWaterfallView viewGroup) {
+    return ((HippyWaterfallView.HippyWaterfallAdapter) viewGroup.getAdapter())
       .getRecyclerItemCount();
   }
 
   @Override
-  public View getChildAt(HippyQBWaterfallView viewGroup, int i) {
-    return ((HippyQBWaterfallView.HippyWaterfallAdapter) viewGroup.getAdapter())
+  public View getChildAt(HippyWaterfallView viewGroup, int i) {
+    return ((HippyWaterfallView.HippyWaterfallAdapter) viewGroup.getAdapter())
       .getRecyclerItemView(i);
   }
 
   @Override
   protected View createViewImpl(Context context) {
-    return new HippyQBWaterfallView(context);
+    return new HippyWaterfallView(context);
   }
 
   @Override
   public RenderNode createRenderNode(int id, HippyMap props, String className,
     HippyRootView hippyRootView, ControllerManager controllerManager,
     boolean lazy) {
-    return new HippyQBWaterfallViewNode(id, props, className, hippyRootView, controllerManager,
+    return new HippyWaterfallViewNode(id, props, className, hippyRootView, controllerManager,
       lazy);
   }
 
   @Override
-  public void onBatchComplete(HippyQBWaterfallView view) {
+  public void onBatchComplete(HippyWaterfallView view) {
     Log.d(TAG, "onBatchComplete #" + view.getId());
     super.onBatchComplete(view);
     view.setListData();
@@ -68,13 +68,13 @@ public class HippyQBWaterfallViewController extends HippyViewController<HippyQBW
   //    }
 
   @HippyControllerProps(name = "containBannerView", defaultType = HippyControllerProps.BOOLEAN, defaultBoolean = false)
-  public void setContainBannerView(HippyQBWaterfallView listview, boolean containBannerView) {
-    ((HippyQBWaterfallLayoutManager) listview.getLayoutManager())
+  public void setContainBannerView(HippyWaterfallView listview, boolean containBannerView) {
+    ((HippyWaterfallLayoutManager) listview.getLayoutManager())
       .setContainBannerView(containBannerView);
   }
 
   @HippyControllerProps(name = WaterFallComponentName.PROPERTY_CONTENT_INSET, defaultType = HippyControllerProps.NUMBER, defaultNumber = 0)
-  public void setContentInset(HippyQBWaterfallView listview, HippyMap data) {
+  public void setContentInset(HippyWaterfallView listview, HippyMap data) {
     int left = dpToPx(data.getInt("left"));
     int top = dpToPx(data.getInt("top"));
     int right = dpToPx(data.getInt("right"));
@@ -88,36 +88,36 @@ public class HippyQBWaterfallViewController extends HippyViewController<HippyQBW
   }
 
   @HippyControllerProps(name = WaterFallComponentName.PROPERTY_ITEM_SPACING, defaultType = HippyControllerProps.NUMBER, defaultNumber = 0)
-  public void setItemSpacing(HippyQBWaterfallView listview, int spacing) {
-    ((HippyQBWaterfallLayoutManager) listview.getLayoutManager())
+  public void setItemSpacing(HippyWaterfallView listview, int spacing) {
+    ((HippyWaterfallLayoutManager) listview.getLayoutManager())
       .setItemGap(dpToPx(spacing));
   }
 
   @HippyControllerProps(name = WaterFallComponentName.PROPERTY_COLUMN_SPACING, defaultType = HippyControllerProps.NUMBER, defaultNumber = 0)
-  public void setColumnSpacing(HippyQBWaterfallView listview, int spacing) {
-    ((HippyQBWaterfallLayoutManager) listview.getLayoutManager())
+  public void setColumnSpacing(HippyWaterfallView listview, int spacing) {
+    ((HippyWaterfallLayoutManager) listview.getLayoutManager())
       .setColumnSpacing(dpToPx(spacing));
   }
 
   @HippyControllerProps(name = "paddingStartZero", defaultType = HippyControllerProps.BOOLEAN, defaultBoolean = true)
-  public void setPaddingStartZero(HippyQBWaterfallView listview, boolean paddingStartZero) {
-    ((HippyQBWaterfallLayoutManager) listview.getLayoutManager())
+  public void setPaddingStartZero(HippyWaterfallView listview, boolean paddingStartZero) {
+    ((HippyWaterfallLayoutManager) listview.getLayoutManager())
       .setPaddingStartZero(paddingStartZero);
   }
 
   @HippyControllerProps(name = "bannerViewMatch", defaultType = HippyControllerProps.BOOLEAN, defaultBoolean = false)
-  public void setBannerViewMatch(HippyQBWaterfallView listview, boolean bannerViewMatch) {
-    ((HippyQBWaterfallLayoutManager) listview.getLayoutManager())
+  public void setBannerViewMatch(HippyWaterfallView listview, boolean bannerViewMatch) {
+    ((HippyWaterfallLayoutManager) listview.getLayoutManager())
       .setBannerViewMatch(bannerViewMatch);
   }
 
   @HippyControllerProps(name = WaterFallComponentName.PROPERTY_COLUMNS, defaultType = HippyControllerProps.NUMBER, defaultNumber = 2)
-  public void setNumberOfColumns(HippyQBWaterfallView listview, int number) {
-    ((HippyQBWaterfallLayoutManager) listview.getLayoutManager()).setColumns(number);
+  public void setNumberOfColumns(HippyWaterfallView listview, int number) {
+    ((HippyWaterfallLayoutManager) listview.getLayoutManager()).setColumns(number);
   }
 
   @HippyControllerProps(name = "enableLoadingFooter")
-  public void setEnableLoadingFooter(HippyQBWaterfallView listView, boolean enableFooter) {
+  public void setEnableLoadingFooter(HippyWaterfallView listView, boolean enableFooter) {
     if (enableFooter) {
       listView.mEnableFooter = true;
       listView.setLoadingStatus(IRecyclerViewFooter.LOADING_STATUS_FINISH, "");
@@ -132,7 +132,7 @@ public class HippyQBWaterfallViewController extends HippyViewController<HippyQBW
   }
 
   @HippyControllerProps(name = "enableRefresh")
-  public void setEnableRefresh(HippyQBWaterfallView listView, boolean enableRefresh) {
+  public void setEnableRefresh(HippyWaterfallView listView, boolean enableRefresh) {
     if (enableRefresh && listView.mEnableRefresh) { // 已有refreshHeader时，不再重复构建refreshHeader
 
       return;
@@ -145,29 +145,29 @@ public class HippyQBWaterfallViewController extends HippyViewController<HippyQBW
   }
 
   @HippyControllerProps(name = "refreshColors")
-  public void setRefreshColors(HippyQBWaterfallView listView, HippyArray refreshColors) {
+  public void setRefreshColors(HippyWaterfallView listView, HippyArray refreshColors) {
 //        int color = HippyQBSkinHandler.getColor(refreshColors);
     listView.setRefreshColors(refreshColors);
 //        listView.setCustomRefreshColor(color, 0, 0);
   }
 
   @HippyControllerProps(name = "refreshColor")
-  public void setRefreshColor(HippyQBWaterfallView listView, int color) {
+  public void setRefreshColor(HippyWaterfallView listView, int color) {
     listView.setCustomRefreshColor(color, 0, 0);
   }
 
   @HippyControllerProps(name = "preloadItemNumber")
-  public void setPreloadItemNumber(HippyQBWaterfallView listView, int preloadItemNumber) {
+  public void setPreloadItemNumber(HippyWaterfallView listView, int preloadItemNumber) {
     listView.setPreloadItemNumber(preloadItemNumber);
   }
 
   @HippyControllerProps(name = "enableOnScrollForReport")
-  public void setEnableOnScrollForReport(HippyQBWaterfallView listView, boolean enable) {
+  public void setEnableOnScrollForReport(HippyWaterfallView listView, boolean enable) {
     listView.setEnableScrollForReport(enable);
   }
 
   @HippyControllerProps(name = "enableExposureReport")
-  public void setOnExposureReport(HippyQBWaterfallView listView, boolean enable) {
+  public void setOnExposureReport(HippyWaterfallView listView, boolean enable) {
     listView.setEnableExposureReport(enable);
   }
 
@@ -180,7 +180,7 @@ public class HippyQBWaterfallViewController extends HippyViewController<HippyQBW
   // 无认知复杂度
   // #lizard forgives
   @Override
-  public void dispatchFunction(HippyQBWaterfallView listView, String functionName,
+  public void dispatchFunction(HippyWaterfallView listView, String functionName,
     HippyArray dataArray) {
     Log.e(TAG, "dispatchFunction " + functionName + dataArray.toString());
     super.dispatchFunction(listView, functionName, dataArray);
@@ -273,7 +273,7 @@ public class HippyQBWaterfallViewController extends HippyViewController<HippyQBW
   }
 
 
-  private void handleRefreshCompleted(HippyQBWaterfallView listView, HippyArray dataArray) {
+  private void handleRefreshCompleted(HippyWaterfallView listView, HippyArray dataArray) {
     int status;
     String text;
     int refreshResult;
