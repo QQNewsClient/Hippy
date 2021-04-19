@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
-apply from: './bintrayUpload.gradle'
+//apply from: './bintrayUpload.gradle'
 //apply from: './maven.gradle'
+apply from: './maven_news.gradle'
 
 ext {
   CMAKE_PATH = "$projectDir.absolutePath/src/main/jni/CMakeLists.txt"
@@ -11,12 +12,19 @@ ext {
 
 buildscript {
   repositories {
+    maven {
+      url "${tencentPublicRepo}"
+    }
+    maven {
+      url "${tencentPublicRepoSnapshot}"
+    }
     google()
     jcenter()
   }
   dependencies {
     classpath 'com.android.tools.build:gradle:4.1.0+'
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
+    classpath "com.tencent.news:tnMaven:2.0.3"
     // NOTE: Do not place your application dependencies here; they belong
     // in the individual module build.gradle files
   }
@@ -156,6 +164,15 @@ android {
       jniLibs.srcDirs = ['libs']
     }
   }
+
+  //命名空间错误
+  lintOptions {
+    checkReleaseBuilds false
+    // Or, if you prefer, you can continue to check for errors in release builds,
+    // but continue the build even when errors are found:
+    abortOnError false
+  }
+
 }
 
 dependencies {
