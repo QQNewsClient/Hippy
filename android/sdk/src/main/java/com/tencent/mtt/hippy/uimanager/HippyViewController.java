@@ -782,4 +782,26 @@ public abstract class HippyViewController<T extends View & HippyViewBase> implem
 		}
 		return null;
 	}
+
+  /**
+   * 拦截方法调用，若返回true，则不再继续分发
+   *
+   * @param view
+   * @param functionName
+   * @param var
+   * @return
+   */
+  public boolean interceptFunctionEvent(T view, String functionName, HippyArray var) {
+    switch (functionName) {
+      case "setDtElement":
+        setDtElement(view, var.getMap(0));
+        break;
+      case "setDtPage":
+        setDtPage(view, var.getMap(0));
+        break;
+      default:
+        return false;
+    }
+    return true;
+  }
 }

@@ -18,13 +18,13 @@ package com.tencent.mtt.hippy.uimanager;
 import android.annotation.SuppressLint;
 import android.content.res.Resources.NotFoundException;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.tencent.mtt.hippy.HippyAPIProvider;
 import com.tencent.mtt.hippy.HippyEngineContext;
 import com.tencent.mtt.hippy.HippyInstanceLifecycleEventListener;
-import com.tencent.mtt.hippy.HippyAPIProvider;
 import com.tencent.mtt.hippy.HippyRootView;
 import com.tencent.mtt.hippy.annotation.HippyController;
 import com.tencent.mtt.hippy.common.HippyArray;
@@ -313,10 +313,17 @@ public class ControllerManager implements HippyInstanceLifecycleEventListener
 		View view = mControllerRegistry.getView(id);
 		if (!promise.isCallback())
 		{
-			hippyViewController.dispatchFunction(view, functionName, var);
+      if (hippyViewController.interceptFunctionEvent(view, functionName, var)) {
+        return;
+      }
+      hippyViewController.dispatchFunction(view, functionName, var);
 		}
 		else
 		{
+      if (hippyViewController.interceptFunctionEvent(view, functionName, var)) {
+        return;
+      }
+
 			hippyViewController.dispatchFunction(view, functionName, var, promise);
 		}
 
