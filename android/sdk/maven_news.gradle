@@ -4,5 +4,5 @@ apply from: 'packAarSourceAndDoc.gradle'
 tnMaven {
   group = "com.tencent.news"
   artifact = "hippy"
-  version = "2.5.56"
+  version = "2.5.57"
 }

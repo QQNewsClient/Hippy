@@ -5,6 +5,8 @@ import demoDialog from './demo-dialog.vue';
 import demoSwiper from './demo-swiper.vue';
 import demoPullHeader from './demo-pull-header.vue';
 import demoPullFooter from './demo-pull-footer.vue';
+import demoWaterfall from './demo-waterfall.vue';
+import demoWaterfallAndroid from './demo-waterfall-android.vue';
 import demoSetNativeProps from '../demos/demo-set-native-props.vue';
 
 const demos = {};
@@ -34,6 +36,14 @@ if (Vue.Native) {
     demoPullFooter: {
       name: 'pull-footer 上拉组件',
       component: demoPullFooter,
+    },
+    demoWaterfall: {
+      name: 'iOS 瀑布流组件',
+      component: demoWaterfall,
+    },
+    demoWaterfallAndroid: {
+      name: 'android 瀑布流组件',
+      component: demoWaterfallAndroid,
     },
     demoSetNativeProps: {
       name: 'setNativeProps',

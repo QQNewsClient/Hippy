@@ -56,6 +56,8 @@ import com.tencent.mtt.hippy.views.textinput.HippyTextInputController;
 import com.tencent.mtt.hippy.views.view.HippyViewGroupController;
 import com.tencent.mtt.hippy.views.viewpager.HippyViewPagerController;
 import com.tencent.mtt.hippy.views.viewpager.HippyViewPagerItemController;
+import com.tencent.mtt.hippy.views.waterfalllist.HippyWaterfallItemViewController;
+import com.tencent.mtt.hippy.views.waterfalllist.HippyWaterfallViewController;
 import com.tencent.mtt.hippy.views.webview.HippyWebViewController;
 import com.tencent.mtt.hippy.views.wormhole.HippyWormholeContainerController;
 import com.tencent.mtt.hippy.views.wormhole.HippyWormholeController;
@@ -229,7 +231,8 @@ public class HippyCoreAPI implements HippyAPIProvider
 		components.add(HippyCustomPropsController.class);
     components.add(HippyWormholeContainerController.class);
 		components.add(HippyWormholeController.class);
-    components.add(HippyWormholeController.class);
+    components.add(HippyWaterfallViewController.class);
+    components.add(HippyWaterfallItemViewController.class);
 
 		addControllerWithClassName(VIDEO_CONTROLLER_CLASS_NAME, components);
 		return components;
