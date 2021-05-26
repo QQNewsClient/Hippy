@@ -617,10 +617,11 @@ public abstract class HippyViewController<T extends View & HippyViewBase> implem
     if (dtAdapter == null) {
       return;
     }
+
     dtAdapter.setDtElement(view, params);
   }
 
-  private HippyDtAdapter getDtAdapter(Context context) {
+  public static HippyDtAdapter getDtAdapter(Context context) {
     if (!(context instanceof HippyInstanceContext)) {
       return null;
     }

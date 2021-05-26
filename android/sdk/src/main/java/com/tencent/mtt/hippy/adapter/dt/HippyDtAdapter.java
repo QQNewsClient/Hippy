@@ -21,4 +21,12 @@ public interface HippyDtAdapter {
    * @param params  元素参数
    */
   void setDtElement(Object element, HippyMap params);
+
+  /**
+   * 元素点击上报
+   *
+   * @param element 元素对象，支持View
+   * @param params  元素参数
+   */
+  void onDtElementClick(Object element, HippyMap params);
 }

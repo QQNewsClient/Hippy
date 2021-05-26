@@ -56,8 +56,6 @@ public class HippyTextView extends View implements CommonBorder, HippyViewBase, 
 	private int							mNativeTextColor		= 0;
 	private boolean						mHasSetNativeTextColor	= false;
 
-
-
 	@Override
 	public void resetProps()
 	{
