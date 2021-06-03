@@ -682,7 +682,7 @@ public class DomManager implements HippyInstanceLifecycleEventListener, HippyEng
 		}
 		else
 		{
-			LogUtils.e(TAG, "dom  deleteNode delete   node is null node.getId() " + id);
+//			LogUtils.e(TAG, "dom  deleteNode delete   node is null node.getId() " + id);
 
 			//			mContext.getGlobalConfigs().getLogAdapter().log(TAG,"dom  deleteNode delete   node is null node.getId() " + id);
 		}
