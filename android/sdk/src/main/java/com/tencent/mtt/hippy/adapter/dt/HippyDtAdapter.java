@@ -1,5 +1,7 @@
 package com.tencent.mtt.hippy.adapter.dt;
 
+import android.view.View;
+
 import com.tencent.mtt.hippy.common.HippyMap;
 
 /**
@@ -29,4 +31,10 @@ public interface HippyDtAdapter {
    * @param params  元素参数
    */
   void onDtElementClick(Object element, HippyMap params);
+
+  /**
+   * 从该View的根视图开始遍历一次页面，找到新页面后会触发新页面进入以及新页面的元素曝光
+   */
+  void traversePage(View view);
+
 }

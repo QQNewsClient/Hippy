@@ -800,6 +800,12 @@ public abstract class HippyViewController<T extends View & HippyViewBase> implem
       case "setDtPage":
         setDtPage(view, var.getMap(0));
         break;
+      case "traversePage":
+        HippyDtAdapter dtAdapter = getDtAdapter(view.getContext());
+        if (dtAdapter != null) {
+          dtAdapter.traversePage(view);
+        }
+        break;
       default:
         return false;
     }
