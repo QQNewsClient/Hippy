@@ -35,6 +35,6 @@ public interface HippyDtAdapter {
   /**
    * 从该View的根视图开始遍历一次页面，找到新页面后会触发新页面进入以及新页面的元素曝光
    */
-  void traversePage(View view);
+  void traversePage(View view, HippyMap params);
 
 }

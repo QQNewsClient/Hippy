@@ -803,7 +803,7 @@ public abstract class HippyViewController<T extends View & HippyViewBase> implem
       case "traversePage":
         HippyDtAdapter dtAdapter = getDtAdapter(view.getContext());
         if (dtAdapter != null) {
-          dtAdapter.traversePage(view);
+          dtAdapter.traversePage(view, var.getMap(0));
         }
         break;
       default:
