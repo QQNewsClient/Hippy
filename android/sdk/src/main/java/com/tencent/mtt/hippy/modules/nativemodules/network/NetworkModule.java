@@ -15,10 +15,10 @@
  */
 package com.tencent.mtt.hippy.modules.nativemodules.network;
 
+import android.os.Build;
 import android.text.TextUtils;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-
 import com.tencent.mtt.hippy.HippyEngineContext;
 import com.tencent.mtt.hippy.HippyGlobalConfigs;
 import com.tencent.mtt.hippy.adapter.http.HippyHttpAdapter;
@@ -33,7 +33,6 @@ import com.tencent.mtt.hippy.modules.Promise;
 import com.tencent.mtt.hippy.modules.nativemodules.HippyNativeModuleBase;
 import com.tencent.mtt.hippy.utils.ContextHolder;
 import com.tencent.mtt.hippy.utils.LogUtils;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -194,7 +193,7 @@ public class NetworkModule extends HippyNativeModuleBase
 			else // 多个cookie
 				saveCookie2Manager(url, keyValue);
 
-			mCookieSyncManager.sync();
+			syncCookie();
 		}
 	}
 
@@ -230,10 +229,17 @@ public class NetworkModule extends HippyNativeModuleBase
 
 			CookieManager cookieManager = CookieManager.getInstance();
 			cookieManager.setAcceptCookie(true);
-			cookieManager.removeSessionCookie();
 		}
 		return CookieManager.getInstance();
 	}
+
+	private static void syncCookie() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      CookieManager.getInstance().flush();
+    } else if (mCookieSyncManager != null) {
+      mCookieSyncManager.sync();
+    }
+  }
 
 	private static class HttpTaskCallbackImpl implements HippyHttpAdapter.HttpTaskCallback
 	{
@@ -290,7 +296,7 @@ public class NetworkModule extends HippyNativeModuleBase
 							}
 						}
 						if (hasSetCookie)
-							mCookieSyncManager.sync();
+              syncCookie();
 					}
 
 					headerMap.pushArray(oneKey, oneHeaderFiled);
