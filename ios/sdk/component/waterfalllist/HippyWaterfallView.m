@@ -499,6 +499,12 @@ typedef NS_ENUM(NSInteger, HippyScrollState) { ScrollStateStop, ScrollStateDragi
         }
     }
     
+    for (NSObject<UIScrollViewDelegate> *scrollViewListener in _scrollListeners) {
+        if ([scrollViewListener respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)]) {
+            [scrollViewListener scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
+        }
+    }
+    
     [_headerRefreshView scrollViewDidEndDragging];
     [_footerRefreshView scrollViewDidEndDragging];
 }
