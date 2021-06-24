@@ -132,7 +132,7 @@ HIPPY_EXPORT_MODULE()
     // We're swizzling here because it's poor form to override methods in a category,
     // however UIWindow doesn't actually implement motionEnded:withEvent:, so there's
     // no need to call the original implementation.
-    HippySwapInstanceMethods([UIWindow class], @selector(motionEnded:withEvent:), @selector(hippy_motionEnded:withEvent:));
+    // HippySwapInstanceMethods([UIWindow class], @selector(motionEnded:withEvent:), @selector(hippy_motionEnded:withEvent:));
 }
 
 - (instancetype)init {
