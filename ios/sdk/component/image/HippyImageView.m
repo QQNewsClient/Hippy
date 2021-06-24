@@ -446,9 +446,11 @@ NSError *imageErrorFromParams(NSInteger errorCode, NSString *errorDescription) {
                         if (image) {
                             [weakSelf loadImage:image url:source[@"uri"] error:nil needBlur:YES needCache:YES];
                         } else {
-                            NSString *errorMessage = [NSString stringWithFormat:@"image data unavailable %@", source[@"uri"]];
-                            NSError *error = imageErrorFromParams(ImageDataUnavailable, errorMessage);
-                            [weakSelf loadImage:nil url:source[@"uri"] error:error needBlur:YES needCache:NO];
+                            if (![error.domain isEqualToString:@""]) {
+                                NSString *errorMessage = [NSString stringWithFormat:@"image data unavailable %@", source[@"uri"]];
+                                NSError *error = imageErrorFromParams(ImageDataUnavailable, errorMessage);
+                                [weakSelf loadImage:nil url:source[@"uri"] error:error needBlur:YES needCache:NO];
+                            }
                         }
                     }
                 }];
