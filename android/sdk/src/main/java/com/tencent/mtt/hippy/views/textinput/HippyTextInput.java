@@ -130,7 +130,7 @@ public class HippyTextInput extends EditText implements HippyViewBase, CommonBor
 		{
 			getRootView().getViewTreeObserver().addOnGlobalLayoutListener(globaListener);
 		}
-			
+
 	}
 
 	@Override
@@ -383,21 +383,9 @@ public class HippyTextInput extends EditText implements HippyViewBase, CommonBor
 		}
 	};
 
-	public void showInputMethodManager()
-	{
-
-		InputMethodManager imm = this.getInputMethodManager();
-
-		try
-		{
-			imm.showSoftInput(this, 0, null);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-
-	}
+  public void showInputMethodManager() {
+    KeyboardUtil.showSoftInput(this);
+  }
 
 
 	private String	mValidator			= "";		//这则表达式,前端传入,要比较小心导致的crash
