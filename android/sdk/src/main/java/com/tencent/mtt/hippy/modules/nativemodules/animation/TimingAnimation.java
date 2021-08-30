@@ -16,6 +16,7 @@
 package com.tencent.mtt.hippy.modules.nativemodules.animation;
 
 import android.animation.Animator;
+import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.os.Build;
 import android.text.TextUtils;
@@ -34,6 +35,7 @@ public class TimingAnimation extends Animation implements ValueAnimator.Animator
 
 	private static final String	VALUE_TYPE_RAD				= "rad";
 	private static final String	VALUE_TYPE_DEG				= "deg";
+	private static final String	VALUE_TYPE_COLOR			= "color";
 	private static final String	TIMING_FUNCTION_LINEAR		= "linear";
 	private static final String	TIMING_FUNCTION_EASE_IN		= "ease-in";
 	private static final String	TIMING_FUNCTION_EASE_OUT	= "ease-out";
@@ -203,7 +205,16 @@ public class TimingAnimation extends Animation implements ValueAnimator.Animator
 			}
 		}
 
-		mAnimator.setFloatValues(mStartValue, mToValue);
+		if (!TextUtils.isEmpty(mValueType) && mValueType.equals(VALUE_TYPE_COLOR))
+		{
+			mAnimator.setIntValues((int) mStartValue, (int) mToValue);
+			mAnimator.setEvaluator(new ArgbEvaluator());
+		}
+		else
+		{
+			mAnimator.setFloatValues(mStartValue, mToValue);
+		}
+
 		mAnimator.setDuration(mDuration);
 		if (TextUtils.equals(TIMING_FUNCTION_EASE_IN, mTimingFunction))
 		{
