@@ -386,13 +386,18 @@ import icon from './qb_icon_new.png';
 | onTouchMove   | 当用户在控件移动手指时，此函数会持续收到回调，并通过event参数告知控件的触屏点信息；参数为 `nativeEvent: { name, page_x, page_y, id }`，`page_x` 和 `page_y` 分别表示点击在屏幕内的绝对位置 | `Function` | `Android、iOS`    |
 | onTouchEnd    | 当触屏操作结束，用户在该控件上抬起手指时，此函数将被回调，event参数也会通知当前的触屏点信息；参数为 `nativeEvent: { name, page_x, page_y, id }`，`page_x` 和 `page_y` 分别表示点击在屏幕内的绝对位置 | `Function`                                | `Android、iOS`    |
 | onTouchCancel | 当用户触屏过程中，某个系统事件中断了触屏，例如电话呼入、组件变化（如设置为hidden）、其他组件的滑动手势，此函数会收到回调，触屏点信息也会通过event参数告知前端；参数为 `nativeEvent: { name, page_x, page_y, id }`，`page_x` 和 `page_y` 分别表示点击在屏幕内的绝对位置 | `Function`                                | `Android、iOS`    |
+| verticalAlign* | 设置文本组件内嵌套文本组件或文本组件内嵌套图片组件时的对齐策略。`default: baseline` | `enum(top, middle, baseline, bottom)` | `Android、iOS(版本2.16.0以上)` |
 
 * ellipsizeMode 的参数含义：
   * `clip` - 超过指定行数的文字会被直接截断，不显示“...”；（仅iOS支持）
   * `head` - 文字将会从头开始截断，保证字符串的最后的文字可以正常显示在 `Text` 组件的最后，而从开头给截断的文字，将以 “...” 代替，例如 “...wxyz”；（仅iOS支持）
   * `middle` - "文字将会从中间开始截断，保证字符串的最后与最前的文字可以正常显示在Text组件的响应位置，而中间给截断的文字，将以 “...” 代替，例如 “ab...yz”；（仅iOS支持）
   * `tail` - 文字将会从最后开始截断，保证字符串的最前的文字可以正常显示在 Text 组件的最前，而从最后给截断的文字，将以 “...” 代替，例如 “abcd...”；
-
+* verticalAlign 的参数含义：
+  * `top`: 行顶部对齐
+  * `middle`: 居中对齐
+  * `baseline`: 基线对齐
+  * `bottom`: 行底部对齐
 ---
 
 # View
