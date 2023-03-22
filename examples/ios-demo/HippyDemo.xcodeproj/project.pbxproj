@@ -402,7 +402,7 @@
 		064C597A23AB1A51001E80DD /* HippyText.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HippyText.mm; sourceTree = "<group>"; };
 		064C597B23AB1A51001E80DD /* HippyVirtualTextNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HippyVirtualTextNode.m; sourceTree = "<group>"; };
 		064C597C23AB1A51001E80DD /* HippyText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HippyText.h; sourceTree = "<group>"; };
-		064C597D23AB1A51001E80DD /* HippyTextDecorationLineType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HippyTextDecorationLineType.h; sourceTree = "<group>"; };
+		064C597D23AB1A51001E80DD /* HippyTextEnumDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HippyTextEnumDefines.h; sourceTree = "<group>"; };
 		064C597E23AB1A51001E80DD /* HippyTextManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HippyTextManager.mm; sourceTree = "<group>"; };
 		064C597F23AB1A51001E80DD /* HippyTextManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HippyTextManager.h; sourceTree = "<group>"; };
 		064C598123AB1A51001E80DD /* HippyModalCustomAnimationTransition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HippyModalCustomAnimationTransition.h; sourceTree = "<group>"; };
@@ -1182,7 +1182,7 @@
 				064C597A23AB1A51001E80DD /* HippyText.mm */,
 				064C597F23AB1A51001E80DD /* HippyTextManager.h */,
 				064C597E23AB1A51001E80DD /* HippyTextManager.mm */,
-				064C597D23AB1A51001E80DD /* HippyTextDecorationLineType.h */,
+				064C597D23AB1A51001E80DD /* HippyTextEnumDefines.h */,
 			);
 			path = text;
 			sourceTree = "<group>";
