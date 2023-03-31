@@ -15,6 +15,7 @@
  */
 package com.tencent.mtt.hippy.views.view;
 
+import android.view.ViewParent;
 import com.tencent.mtt.hippy.dom.node.NodeProps;
 import com.tencent.mtt.hippy.uimanager.IHippyZIndexViewGroup;
 import com.tencent.mtt.hippy.uimanager.ViewGroupDrawingOrderHelper;
@@ -49,6 +50,7 @@ public class HippyViewGroup extends HippyImageView implements IHippyZIndexViewGr
   private Rect mOutlineRect;
   private int mOldLayerType;
   private ViewConfiguration mViewConfiguration;
+  private boolean mDisallowInterceptTouchEvent = false;
 
   public HippyViewGroup(Context context) {
     super(context);
@@ -250,6 +252,12 @@ public class HippyViewGroup extends HippyImageView implements IHippyZIndexViewGr
   public boolean onInterceptTouchEvent(MotionEvent ev) {
     int action = ev.getAction() & MotionEvent.ACTION_MASK;
     if (action == MotionEvent.ACTION_DOWN) {
+      if (mDisallowInterceptTouchEvent) {
+        ViewParent parent = getParent();
+        if (parent != null) {
+          parent.requestDisallowInterceptTouchEvent(true);
+        }
+      }
       mDownX = ev.getX();
       mDownY = ev.getY();
       isHandlePullUp = false;
@@ -346,6 +354,10 @@ public class HippyViewGroup extends HippyImageView implements IHippyZIndexViewGr
     mOverflow = null;
     setClipChildren(true); //默认值是false
     //		setAlpha(1.0f);
+  }
+
+  public void setDisallowInterceptTouchEvent(boolean disallow) {
+    mDisallowInterceptTouchEvent = disallow;
   }
 
   //	@Override
