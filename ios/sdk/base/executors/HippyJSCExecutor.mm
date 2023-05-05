@@ -345,6 +345,14 @@ static unicode_string_view NSStringToU8(NSString* str) {
         JSGlobalContextRef contextRef = [self JSGlobalContextRef];
         if (contextRef) {
             _JSContext = [JSContext contextWithJSGlobalContextRef:contextRef];
+#if HIPPY_DEBUG
+#if defined(__IPHONE_16_4) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_16_4
+            if (@available(iOS 16.4, *)) {
+                [_JSContext setInspectable:YES];
+            }
+#endif //defined(__IPHONE_16_4) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_16_4
+#endif //HIPPY_DEBUG
+
             HippyBridge *bridge = self.bridge;
             if ([bridge isKindOfClass:[HippyBatchedBridge class]]) {
                 bridge = [(HippyBatchedBridge *)bridge parentBridge];
@@ -472,6 +480,20 @@ HIPPY_EXPORT_METHOD(setContextName:(NSString *)contextName) {
     else {
         context->SetGlobalStrVar("__HIPPYCURDIR__", NSStringToU8(@""));
     }
+}
+
+- (void)setInspectable:(BOOL)inspectable {
+#if defined(__IPHONE_16_4) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_16_4
+    if (@available(iOS 16.4, *)) {
+        __weak HippyJSCExecutor *weakSelf = self;
+        [self executeBlockOnJavaScriptQueue:^{
+            HippyJSCExecutor *strongSelf = weakSelf;
+            if (strongSelf) {
+                [[strongSelf JSContext] setInspectable:inspectable];
+            }
+        }];
+    }
+#endif //defined(__IPHONE_16_4) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_16_4
 }
 
 - (void)updateGlobalObjectBeforeExcuteSecondary{

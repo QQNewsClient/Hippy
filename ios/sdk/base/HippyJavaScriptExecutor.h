@@ -63,6 +63,8 @@ class Scope;
  */
 - (void)flushedQueue:(HippyJavaScriptCallback)onComplete;
 
+- (void)setInspectable:(BOOL)inspectable;
+
 /**
  * called when second bundle load
  */
