@@ -4,11 +4,15 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import com.tencent.mtt.hippy.HippyRootView;
 import com.tencent.mtt.hippy.annotation.HippyController;
 import com.tencent.mtt.hippy.annotation.HippyControllerProps;
 import com.tencent.mtt.hippy.common.HippyArray;
 import com.tencent.mtt.hippy.common.HippyMap;
+import com.tencent.mtt.hippy.uimanager.ControllerManager;
 import com.tencent.mtt.hippy.uimanager.HippyGroupController;
+import com.tencent.mtt.hippy.uimanager.RenderNode;
+import com.tencent.mtt.hippy.uimanager.ScrollViewRenderNode;
 import com.tencent.mtt.hippy.utils.PixelUtil;
 import com.tencent.mtt.hippy.views.list.HippyListView;
 import com.tencent.mtt.supportui.views.recyclerview.BaseLayoutManager;
@@ -46,6 +50,12 @@ public class HippyScrollViewController<T extends ViewGroup & HippyScrollView> ex
   @Override
   protected View createViewImpl(Context context) {
     return null;
+  }
+
+  @Override
+  public RenderNode createRenderNode(int id, HippyMap props, String className, HippyRootView hippyRootView,
+          ControllerManager controllerManager, boolean lazy) {
+    return new ScrollViewRenderNode(id, props, className, hippyRootView, controllerManager, lazy);
   }
 
   @HippyControllerProps(name = "scrollEnabled", defaultType = HippyControllerProps.BOOLEAN, defaultBoolean = true)
@@ -113,7 +123,7 @@ public class HippyScrollViewController<T extends ViewGroup & HippyScrollView> ex
     super.onBatchComplete(view);
 
     if (view instanceof HippyScrollView) {
-      ((HippyScrollView)view).scrollToInitContentOffset();
+      ((HippyScrollView)view).updateContentOffset();
     }
   }
 
