@@ -108,6 +108,11 @@ public class RenderManager {
     uiNode.updateLayout(x, y, w, h);
 
     addUpdateNodeIfNeeded(uiNode);
+    if (uiNode.getParent() instanceof ScrollViewRenderNode) {
+      // ScrollView doesn't receive updateLayout when its content changes,
+      // so we specifically call addUpdateNodeIfNeeded()
+      addUpdateNodeIfNeeded(uiNode.getParent());
+    }
   }
 
   public void updateNode(int id, HippyMap map) {
