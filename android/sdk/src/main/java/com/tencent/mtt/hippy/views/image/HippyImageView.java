@@ -406,13 +406,6 @@ public class HippyImageView extends AsyncImageView implements CommonBorder, Hipp
     }
   }
 
-  @Override
-  protected boolean hasImage(IDrawableTarget resultDrawable) {
-    return (resultDrawable != null && resultDrawable.getBitmap() != null)
-            || (resultDrawable != null && resultDrawable.getDrawable() != null)
-            || (resultDrawable instanceof HippyDrawable && ((HippyDrawable) resultDrawable).getGIF() != null);
-  }
-
   protected boolean drawGIF(Canvas canvas) {
     if (mGifMovie == null) {
       return false;

@@ -332,7 +332,7 @@ public class AsyncImageView extends ViewGroup implements Animator.AnimatorListen
 	}
 
 	protected void handleImageRequest(IDrawableTarget resultDrawable, int sourceType, Object requestInfo) {
-		if (!hasImage(resultDrawable)) {
+		if (resultDrawable == null) {
 			if (sourceType == SOURCE_TYPE_SRC) {
 				mSourceDrawable = null;
 				if (mDefaultSourceDrawable != null) {
@@ -357,10 +357,6 @@ public class AsyncImageView extends ViewGroup implements Animator.AnimatorListen
 			}
 			setContent(sourceType);
 		}
-	}
-
-	protected boolean hasImage(IDrawableTarget resultDrawable) {
-		return resultDrawable != null;
 	}
 
 	protected ContentDrawable generateContentDrawable()
