@@ -60,7 +60,7 @@ public class HippyListAdapter extends RecyclerAdapter implements IRecycleItemTyp
   @Override
   public RecyclerView.ViewHolderWrapper onCreateSuspendViewHolderWithPos(RecyclerViewBase parent,
       int position, int viewType) {
-    return null;
+    return onCreateViewHolderWithPos(parent, position, viewType);
   }
 
   @Override

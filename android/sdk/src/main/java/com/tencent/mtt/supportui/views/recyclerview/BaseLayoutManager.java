@@ -642,6 +642,7 @@ public abstract class BaseLayoutManager extends RecyclerViewBase.LayoutManager
 					suspensionViewHolder.setIsRecyclable(true);
 				}
 			}
+			mCurrentSuspentionView = null;
 			removeAndRecycleScrapInt(recycler, true, true);
 		}
 		final int extraForStart;
@@ -824,6 +825,8 @@ public abstract class BaseLayoutManager extends RecyclerViewBase.LayoutManager
 	{
 		if (mCurrentSuspentionView != null && mCurrentSuspentionView.getParent() == mRecyclerView)
 		{
+			RecyclerViewBase.ViewHolder viewHolder = mRecyclerView.getChildViewHolder(mCurrentSuspentionView);
+			viewHolder.setIsRecyclable(true);
 			mCurrentSuspentionView.clearAnimation();
 			mRecyclerView.removeAnimatingView(mCurrentSuspentionView, true);
 			mCurrentSuspentionView = null;
@@ -1338,16 +1341,19 @@ public abstract class BaseLayoutManager extends RecyclerViewBase.LayoutManager
 		// Log.d("leo", "--------------------------------");
 		View startView = getChildClosestToStartByOrder();
 		int startPos = getPosition(startView);
-		if (startView.getTop() > 0)
+		/*if (startView.getTop() > 0)
 		{
 			showCurrentSuspention(RecyclerViewBase.NO_POSITION);
 			return;
-		}
+		}*/
 		// int top = getDecoratedStart(startView);
 		int lastSuspentedPos = mRecyclerView.findPrevSuspentedPos(startPos);
 		if (lastSuspentedPos != -1)
 		{
 			showCurrentSuspention(lastSuspentedPos);
+		} else {
+			showCurrentSuspention(RecyclerViewBase.NO_POSITION);
+			return;
 		}
 		// Log.d("TMYSUS", "start=" + startPos + ",last=" + lastSuspendedPos);
 		if (mCurrentSuspentionView != null && mCurrentSuspentionView.getParent() == mRecyclerView)
@@ -1706,14 +1712,29 @@ public abstract class BaseLayoutManager extends RecyclerViewBase.LayoutManager
 	{
 		// TODO Auto-generated method stub
 		Log.d("TMYHIS", "showCurrentSuspention=");
+		boolean change = position != mCurrentSuspentionPos;
 		mRecyclerView.mAnimatingViewPrevPos = mRecyclerView.mAnimatingViewPos;
 		mRecyclerView.mAnimatingViewPos = position;
 		mCurrentSuspentionPos = position;
-		removeSuspentions();
+		if (change) {
+			removeSuspentions();
+		}
 		if (position == RecyclerViewBase.NO_POSITION || mRecyclerView.mRecycler == null)
 		{
 			mCurrentSuspentionView = null;
 			return;
+		}
+		if (mCurrentSuspentionView != null) {
+			// SuspentionView存在，只需要重新把它移回顶部
+			mCurrentSuspentionView.offsetTopAndBottom(-mCurrentSuspentionView.getTop());
+			return;
+		}
+		View addedView = mRecyclerView.findViewByPosition(position);
+		if (addedView != null) {
+			// 如果position对应正在list中显示，需要先把它放进回收池，后面的逻辑才能把它插入到正确的层级位置
+			int index = mRecyclerView.indexOfChild(addedView);
+			recycleChildren(mRecyclerView.mRecycler, index, index + 1);
+			addedView = null;
 		}
 		View v;
 		if (mRecyclerView.isRepeatableSuspensionMode())

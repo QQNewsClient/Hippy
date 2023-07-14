@@ -3759,14 +3759,14 @@ public abstract class RecyclerViewBase extends ViewGroup
 				if (currentSuspentionView != null && offsetPosition == ((BaseLayoutManager) getLayoutManager()).getCurrentSuspentionPosition())
 				{
 					// set current suspentionView recycleable here
-					if (currentSuspentionView != null)
+					/*if (currentSuspentionView != null)
 					{
 						RecyclerViewBase.ViewHolder suspentionViewHolder = getChildViewHolder(currentSuspentionView);
 						if (suspentionViewHolder != null)
 						{
 							suspentionViewHolder.setIsRecyclable(true);
 						}
-					}
+					}*/
 					((BaseLayoutManager) getLayoutManager()).removeSuspentions();
 				}
 			}
