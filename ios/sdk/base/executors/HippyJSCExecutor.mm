@@ -738,14 +738,19 @@ static NSError *executeApplicationScript(NSData *script, NSURL *sourceURL, Hippy
 }
 
 - (void)executeBlockOnJavaScriptQueue:(dispatch_block_t)block {
+    dispatch_block_t realBlock = ^(){
+        @autoreleasepool {
+            block();
+        }
+    };
     Engine *engine = [[HippyJSEnginesMapper defaultInstance] JSEngineForKey:self.executorkey].get();
     if (engine) {
         if (engine->GetJSRunner()->IsJsThread() == false) {
             std::shared_ptr<JavaScriptTask> task = std::make_shared<JavaScriptTask>();
-            task->callback = block;
+            task->callback = realBlock;
             engine->GetJSRunner()->PostTask(task);
         } else {
-            block();
+            realBlock();
         }
     }
 }
