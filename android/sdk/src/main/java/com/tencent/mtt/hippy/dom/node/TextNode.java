@@ -36,6 +36,7 @@ import android.text.style.AbsoluteSizeSpan;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.ImageSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.UnderlineSpan;
 import com.tencent.mtt.hippy.HippyEngineContext;
@@ -79,7 +80,7 @@ public class TextNode extends StyleNode {
 
   CharSequence mText;
   protected int mNumberOfLines = UNSET;
-
+  private String mEllipsizeMode = MODE_TAIL;
   protected int mFontSize = (int) Math.ceil(PixelUtil.dp2px(NodeProps.FONT_SIZE_SP));
   private float mLineHeight = UNSET;
   private float mLetterSpacing = UNSET;
@@ -162,6 +163,21 @@ public class TextNode extends StyleNode {
     if (fontStyle != mFontStyle) {
       mFontStyle = fontStyle;
       markUpdated();
+    }
+  }
+
+  @HippyControllerProps(name = NodeProps.ELLIPSIZE_MODE, defaultType = HippyControllerProps.STRING, defaultString = MODE_TAIL)
+  public void setEllipsizeMode(String mode) {
+    if (TextUtils.isEmpty(mode)) {
+      mode = MODE_TAIL;
+    }
+    if (!mEllipsizeMode.equals(mode)) {
+      if (MODE_TAIL.equals(mode) || MODE_CLIP.equals(mode) || MODE_MIDDLE.equals(mode) || MODE_HEAD.equals(mode)) {
+        mEllipsizeMode = mode;
+        markUpdated();
+      } else {
+        throw new RuntimeException("Invalid ellipsizeMode: " + mode);
+      }
     }
   }
 
@@ -709,24 +725,24 @@ public class TextNode extends StyleNode {
     } catch (Throwable e) {
       LogUtils.d("TextNode", "createLayout: " + e.getMessage());
     }
-    float desiredWidth = boring == null ? Layout.getDesiredWidth(text, textPaint) : Float.NaN;
 
     boolean unconstrainedWidth = widthMode == FlexMeasureMode.UNDEFINED || width < 0;
-    if (boring == null && (unconstrainedWidth || (!FlexConstants.isUndefined(desiredWidth)
-        && desiredWidth <= width))) {
-      layout = new StaticLayout(text, textPaint, (int)Math.ceil(desiredWidth), mTextAlign, getLineSpacingMultiplier(),
-        mLineSpacingExtra, true);
-    } else if (boring != null && (unconstrainedWidth || boring.width <= width)) {
+    if (boring != null && (unconstrainedWidth || boring.width <= width)) {
       layout = BoringLayout.make(text, textPaint, boring.width, mTextAlign, getLineSpacingMultiplier(), mLineSpacingExtra, boring, true);
     } else {
-      layout = buildStaticLayout(text, textPaint, (int)Math.ceil(width));
-    }
-    if (mNumberOfLines != UNSET && mNumberOfLines > 0) {
-      if (layout.getLineCount() > mNumberOfLines) {
-        int lastLineStart = layout.getLineStart(mNumberOfLines - 1);
-        int lastLineEnd = layout.getLineEnd(mNumberOfLines - 1);
-        if (lastLineStart < lastLineEnd) {
-          layout = createLayoutWithNumberOfLine(lastLineStart, layout.getWidth());
+      float desiredWidth = Layout.getDesiredWidth(text, textPaint);
+      if (!unconstrainedWidth && (widthMode == FlexMeasureMode.EXACTLY || desiredWidth > width)) {
+        desiredWidth = width;
+      }
+      layout = buildStaticLayout(text, textPaint, (int) Math.ceil(desiredWidth));
+      if (mNumberOfLines != UNSET && mNumberOfLines > 0) {
+        if (layout.getLineCount() > mNumberOfLines) {
+          int lastLineStart = layout.getLineStart(mNumberOfLines - 1);
+          int lastLineEnd = layout.getLineEnd(mNumberOfLines - 1);
+          if (lastLineStart < lastLineEnd) {
+            int measureWidth = (int)Math.ceil(unconstrainedWidth ? desiredWidth : width);
+            layout = truncateLayoutWithNumberOfLine(layout, measureWidth, mNumberOfLines);
+          }
         }
       }
     }
@@ -747,56 +763,166 @@ public class TextNode extends StyleNode {
     return layout;
   }
 
-  private StaticLayout createLayoutWithNumberOfLine(int lastLineStart, int width) {
-    if (mSpanned == null) {
-      return null;
-    }
-    String text = mSpanned.toString();
-    SpannableStringBuilder temp = (SpannableStringBuilder) mSpanned.subSequence(0, text.length());
-    String ellipsizeStr = (String) TextUtils
-        .ellipsize(text.substring(lastLineStart), sTextPaintInstance, width,
-            TextUtils.TruncateAt.END);
-    String newString = text.subSequence(0, lastLineStart).toString()
-        + truncate(ellipsizeStr, sTextPaintInstance, width, mTruncateAt);
+  private float getLineHeight(Layout layout, int line) {
+    return layout.getLineTop(line + 1) - layout.getLineTop(line);
+  }
 
-    int start = Math.max(newString.length() - 1, 0);
-    CharacterStyle[] hippyStyleSpans = temp.getSpans(start, text.length(), CharacterStyle.class);
-    if (hippyStyleSpans != null && hippyStyleSpans.length > 0) {
-      for (CharacterStyle hippyStyleSpan : hippyStyleSpans) {
-        if (temp.getSpanStart(hippyStyleSpan) >= start) {
-          temp.removeSpan(hippyStyleSpan);
+  private StaticLayout truncateLayoutWithNumberOfLine(Layout preLayout, int width, int numberOfLines) {
+    int lineCount = preLayout.getLineCount();
+    assert lineCount >= 2;
+    CharSequence origin = preLayout.getText();
+    TextPaint paint = preLayout.getPaint();
+
+    CharSequence truncated;
+    if (MODE_CLIP.equals(mEllipsizeMode)) {
+      int end = preLayout.getLineEnd(numberOfLines - 1);
+      if (origin.charAt(end - 1) == '\n') {
+        // there will be an unexpected blank line, if ends with a new line char, trim it
+        --end;
+      }
+      truncated = origin.subSequence(0, end);
+    } else {
+      TextPaint measurePaint = new TextPaint();
+      measurePaint.set(paint);
+      int start = preLayout.getLineStart(numberOfLines - 1);
+      CharSequence formerLines;
+      if (start > 0) {
+        boolean newline = origin.charAt(start - 1) != '\n';
+        if (origin instanceof Spanned) {
+          formerLines = new SpannableStringBuilder().append(origin, 0, start);
+          if (newline) {
+            ((SpannableStringBuilder) formerLines).append('\n');
+          }
+        } else {
+          formerLines = new StringBuilder().append(origin, 0, start);
+          if (newline) {
+            ((StringBuilder) formerLines).append('\n');
+          }
+        }
+      } else {
+        formerLines = null;
+      }
+      CharSequence lastLine;
+      if (MODE_HEAD.equals(mEllipsizeMode)) {
+        float formerTextSize = numberOfLines >= 2 ? getLineHeight(preLayout, numberOfLines - 2) : paint.getTextSize();
+        float latterTextSize = Math.max(getLineHeight(preLayout, lineCount - 2), getLineHeight(preLayout, lineCount - 1));
+        measurePaint.setTextSize(Math.max(formerTextSize, latterTextSize));
+        lastLine = ellipsizeHead(origin, measurePaint, width, start);
+      } else if (MODE_MIDDLE.equals(mEllipsizeMode)) {
+        measurePaint.setTextSize(Math.max(getLineHeight(preLayout, numberOfLines - 1), getLineHeight(preLayout, lineCount - 1)));
+        lastLine = ellipsizeMiddle(origin, measurePaint, width, start);
+      } else /*if (MODE_TAIL.equals(mEllipsizeMode))*/ {
+        measurePaint.setTextSize(getLineHeight(preLayout, numberOfLines - 1));
+        int end = preLayout.getLineEnd(numberOfLines - 1);
+        lastLine = ellipsizeTail(origin, measurePaint, width, start, end);
+      }
+      // concat everything
+      truncated = formerLines == null ? lastLine : formerLines instanceof SpannableStringBuilder
+              ? ((SpannableStringBuilder) formerLines).append(lastLine)
+              : ((StringBuilder) formerLines).append(lastLine);
+    }
+
+    return buildStaticLayout(truncated, paint, width);
+  }
+
+
+  private CharSequence ellipsizeHead(CharSequence origin, TextPaint paint, int width, int start) {
+    start = Math.max(start, TextUtils.lastIndexOf(origin, '\n') + 1);
+    // "…${last line of the rest part}"
+    CharSequence tmp;
+    if (origin instanceof Spanned) {
+      tmp = new SpannableStringBuilder()
+              .append(ELLIPSIS)
+              .append(origin, start, origin.length());
+    } else {
+      tmp = new StringBuilder(ELLIPSIS.length() + origin.length() - start)
+              .append(ELLIPSIS)
+              .append(origin, start, origin.length());
+    }
+    CharSequence result = TextUtils.ellipsize(tmp, paint, width, TextUtils.TruncateAt.START);
+    if (result instanceof Spannable) {
+      // make spans cover the "…"
+      Spannable sp = (Spannable) result;
+      int spanStart = ELLIPSIS.length();
+      Object[] spans = sp.getSpans(spanStart, spanStart, Object.class);
+      for (Object span : spans) {
+        if (!(span instanceof ImageSpan) && sp.getSpanStart(span) == spanStart) {
+          int flag = sp.getSpanFlags(span);
+          int spanEnd = sp.getSpanEnd(span);
+          sp.removeSpan(span);
+          sp.setSpan(span, 0, spanEnd, flag);
         }
       }
     }
+    return result;
+  }
 
-    return buildStaticLayout(temp.replace(start, text.length(), ELLIPSIS), sTextPaintInstance, width);
+  private CharSequence ellipsizeMiddle(CharSequence origin, TextPaint paint, int width, int start) {
+    int leftEnd, rightStart;
+    if ((leftEnd = TextUtils.indexOf(origin, '\n', start)) != -1) {
+      rightStart = TextUtils.lastIndexOf(origin, '\n') + 1;
+      assert leftEnd < rightStart;
+      // "${first line of the rest part}…${last line of the rest part}"
+      CharSequence tmp;
+      if (origin instanceof Spanned) {
+        tmp = new SpannableStringBuilder()
+                .append(origin, start, leftEnd)
+                .append(ELLIPSIS)
+                .append(origin, rightStart, origin.length());
+      } else {
+        tmp = new StringBuilder(leftEnd - start + ELLIPSIS.length() + origin.length() - rightStart)
+                .append(origin, start, leftEnd)
+                .append(ELLIPSIS)
+                .append(origin, rightStart, origin.length());
+      }
+      final int[] outRange = new int[2];
+      TextUtils.EllipsizeCallback callback = new TextUtils.EllipsizeCallback() {
+        @Override
+        public void ellipsized(int l, int r) {
+          outRange[0] = l;
+          outRange[1] = r;
+        }
+      };
+      CharSequence line = TextUtils.ellipsize(tmp, paint, width, TextUtils.TruncateAt.MIDDLE, false, callback);
+      if (line != tmp) {
+        int pos0 = leftEnd - start;
+        int pos1 = pos0 + ELLIPSIS.length();
+        if (outRange[0] > pos0) {
+          line = tmp instanceof SpannableStringBuilder
+                  ? ((SpannableStringBuilder) tmp).replace(pos0, outRange[1], ELLIPSIS)
+                  : ((StringBuilder) tmp).replace(pos0, outRange[1], ELLIPSIS);
+        } else if (outRange[1] < pos1) {
+          line = tmp instanceof SpannableStringBuilder
+                  ? ((SpannableStringBuilder) tmp).replace(outRange[0], pos1, ELLIPSIS)
+                  : ((StringBuilder) tmp).replace(outRange[0], pos1, ELLIPSIS);
+        }
+      }
+      return line;
+    } else {
+      // "${only one line of the rest part}"
+      CharSequence tmp = origin.subSequence(start, origin.length());
+      return TextUtils.ellipsize(tmp, paint, width, TextUtils.TruncateAt.MIDDLE);
+    }
+  }
+
+  private CharSequence ellipsizeTail(CharSequence origin, TextPaint paint, int width, int start, int end) {
+    if (origin.charAt(end - 1) == '\n') {
+      // there will be an unexpected blank line, if ends with a new line char, trim it
+      --end;
+    }
+    // "${first line of the rest part}…"
+    CharSequence tmp;
+    if (origin instanceof Spanned) {
+      tmp = new SpannableStringBuilder()
+              .append(origin, start, end).append(ELLIPSIS);
+    } else {
+      tmp = new StringBuilder(end - start + ELLIPSIS.length())
+              .append(origin, start, end).append(ELLIPSIS);
+    }
+    return TextUtils.ellipsize(tmp, paint, width, TextUtils.TruncateAt.END);
   }
 
   private static final String ELLIPSIS = "\u2026";
-
-  public String truncate(String source, TextPaint paint, int desired,
-      TextUtils.TruncateAt truncateAt) {
-    if (!TextUtils.isEmpty(source)) {
-      StringBuilder builder;
-      Spanned spanned;
-      StaticLayout layout;
-      for (int i = source.length(); i > 0; i--) {
-        builder = new StringBuilder(i + 1);
-        if (truncateAt != null) {
-          builder.append(source, 0, i > 1 ? i - 1 : i);
-          builder.append(ELLIPSIS);
-        } else {
-          builder.append(source, 0, i);
-        }
-        spanned = createSpan(builder.toString(), false);
-        layout = buildStaticLayout(spanned, paint, desired);
-        if (layout.getLineCount() <= 1) {
-          return spanned.toString();
-        }
-      }
-    }
-    return "";
-  }
 
   @HippyControllerProps(name = PROP_VERTICAL_ALIGN, defaultType = HippyControllerProps.STRING)
   public void setVerticalAlign(String align) {
