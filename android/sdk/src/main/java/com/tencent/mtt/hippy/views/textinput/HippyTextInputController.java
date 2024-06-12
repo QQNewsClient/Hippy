@@ -33,7 +33,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.inputmethod.EditorInfo;
+import com.tencent.mtt.hippy.HippyEngineContext;
+import com.tencent.mtt.hippy.HippyInstanceContext;
 import com.tencent.mtt.hippy.HippyRootView;
+import com.tencent.mtt.hippy.adapter.font.HippyFontScaleAdapter;
 import com.tencent.mtt.hippy.annotation.HippyController;
 import com.tencent.mtt.hippy.annotation.HippyControllerProps;
 import com.tencent.mtt.hippy.common.HippyArray;
@@ -41,6 +44,7 @@ import com.tencent.mtt.hippy.common.HippyMap;
 import com.tencent.mtt.hippy.dom.node.NodeProps;
 import com.tencent.mtt.hippy.dom.node.StyleNode;
 import com.tencent.mtt.hippy.dom.node.TextExtra;
+import com.tencent.mtt.hippy.dom.node.TypeFaceUtil;
 import com.tencent.mtt.hippy.modules.Promise;
 import com.tencent.mtt.hippy.uimanager.HippyViewController;
 import com.tencent.mtt.hippy.utils.LogUtils;
@@ -245,6 +249,24 @@ public class HippyTextInputController extends HippyViewController<HippyTextInput
     }
   }
 
+  protected void updateTypeface(HippyTextInput view, String fontFamily, int style) {
+    Typeface typeface = null;
+    Context context = view.getContext();
+    if (context instanceof HippyInstanceContext) {
+      HippyEngineContext engineContext = ((HippyInstanceContext) context).getEngineContext();
+      if (engineContext != null) {
+        HippyFontScaleAdapter fontScaleAdapter = engineContext.getGlobalConfigs().getFontScaleAdapter();
+        if (fontScaleAdapter != null) {
+          typeface = TypeFaceUtil.getTypeface(fontFamily, style, fontScaleAdapter);
+        }
+      }
+    }
+    if (typeface == null) {
+      typeface = Typeface.create(fontFamily, style);
+    }
+    view.setTypeface(typeface);
+  }
+
   @HippyControllerProps(name = NodeProps.FONT_FAMILY, defaultType = HippyControllerProps.STRING, defaultString = "normal")
   public void setFontFamily(HippyTextInput view, String fontFamily) {
     if (TextUtils.isEmpty(fontFamily)) {
@@ -254,8 +276,7 @@ public class HippyTextInputController extends HippyViewController<HippyTextInput
     if (view.getTypeface() != null) {
       style = view.getTypeface().getStyle();
     }
-    Typeface newTypeface = Typeface.create(fontFamily, style);
-    view.setTypeface(newTypeface);
+    updateTypeface(view, fontFamily, style);
   }
 
   private static final InputFilter[] EMPTY_FILTERS = new InputFilter[0];
