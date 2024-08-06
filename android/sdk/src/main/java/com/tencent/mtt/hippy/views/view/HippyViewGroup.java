@@ -80,6 +80,7 @@ public class HippyViewGroup extends HippyImageView implements IHippyZIndexViewGr
           if (mOverflowPath != null) {
             mOverflowPath.rewind();
           }
+          resetClipToOutline();
           restoreLayerType();
           break;
         case "hidden":
@@ -134,9 +135,12 @@ public class HippyViewGroup extends HippyImageView implements IHippyZIndexViewGr
           }
           break;
         default:
+          resetClipToOutline();
           restoreLayerType();
           break;
       }
+    } else {
+      resetClipToOutline();
     }
     super.dispatchDraw(canvas);
     //        String testString = "View ID:" + this.getId();
@@ -214,12 +218,19 @@ public class HippyViewGroup extends HippyImageView implements IHippyZIndexViewGr
   //		return mBGDrawable;
   //	}
 
+  protected void resetClipToOutline() {
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP && getClipToOutline()) {
+      setClipToOutline(false);
+    }
+  }
+
   public void setOverflow(String overflow) {
     mOverflow = overflow;
     //robinsli Android 支持 overflow: visible，超出容器之外的属性节点也可以正常显示
     if (!TextUtils.isEmpty(mOverflow)) {
       switch (mOverflow) {
         case "visible":
+          resetClipToOutline();
           setClipChildren(false); //可以超出父亲区域
           break;
         case "hidden": {
@@ -227,6 +238,8 @@ public class HippyViewGroup extends HippyImageView implements IHippyZIndexViewGr
           break;
         }
       }
+    } else {
+      resetClipToOutline();
     }
     invalidate();
   }
@@ -352,6 +365,7 @@ public class HippyViewGroup extends HippyImageView implements IHippyZIndexViewGr
     //		mBGDrawable = null;
     //		super.setBackgroundDrawable(null);
     mOverflow = null;
+    resetClipToOutline();
     setClipChildren(true); //默认值是false
     //		setAlpha(1.0f);
   }
